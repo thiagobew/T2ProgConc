@@ -1,3 +1,4 @@
+from typing import List
 from Enum.Enum import Bases, Rockets
 import globals
 from threading import Thread
@@ -23,24 +24,58 @@ class SpaceBase(Thread):
         self.__print_space_base_info()
         globals.release_print()
 
+        self.need_resources = False
+        self.rockets_list: List[Rocket] = []
+
         while (globals.get_release_system() == False):
             pass
 
         # Só pode ser lançado um foguete por vez
         while True:
-            pass
+            if self.name == Bases.MOON:
+                self.__earth_bases_run()
+            else:
+                self.__moon_bases_run()
 
-    def base_rocket_resources(self, rocket: Rockets):
-        if rocket == Rockets.DRAGON:
-            self.__create_dragon_rocket()
-        elif rocket == Rockets.FALCON:
-            self.__create_falcon_rocket()
-        elif rocket == Rockets.LION:
-            self.__create_lion_rocket()
+    def __moon_bases_run(self):
+        if self.uranium == 0 or self.fuel == 0:
+            globals.moon_need_resources = True
+        else:
+            self.__attack_a_planet()
+
+    def __earth_bases_run(self):
+        if globals.moon_need_resources:
+            self.__send_resources_to_moon()
+        else:
+            self.__attack_a_planet()
+
+    def __send_resources_to_moon(self):
+        rocket = self.__create_lion_rocket()
+        if rocket is None:  # No resources for the rocket
+            pass  # Coletar recurso de alguma base
+        else:
+            rocket.voyage(Bases.MOON)
+
+    def __attack_a_planet(self):
+        rocket_name = choice(Rockets.DRAGON, Rockets.FALCON)
+        rocket = self.__create_rocket(rocket_name)
+
+        if rocket is None:  # No resources for the rocket
+            pass  # Coletar recurso de alguma base
+        else:
+            rocket.voyage()
+
+    def __create_rocket(self, rocket_name: Rockets) -> Rocket:
+        if rocket_name == Rockets.DRAGON:
+            return self.__create_dragon_rocket()
+        elif rocket_name == Rockets.FALCON:
+            return self.__create_falcon_rocket()
+        elif rocket_name == Rockets.LION:
+            return self.__create_lion_rocket()
         else:
             print('Invalid rocket name')
 
-    def __create_dragon_rocket(self):
+    def __create_dragon_rocket(self) -> Rocket:
         if self.uranium > 35 and self.fuel > 50:
             self.uranium -= 35
 
@@ -51,7 +86,10 @@ class SpaceBase(Thread):
             else:
                 self.fuel -= 100
 
-    def __create_falcon_rocket(self):
+            return Rocket(Rockets.DRAGON)
+        return None
+
+    def __create_falcon_rocket(self) -> Rocket:
         if self.uranium > 35 and self.fuel > 90:
             self.uranium -= 35
 
@@ -62,7 +100,10 @@ class SpaceBase(Thread):
             else:
                 self.fuel -= 120
 
-    def __create_lion_rocket(self):
+            return Rocket(Rockets.FALCON)
+        return None
+
+    def __create_lion_rocket(self) -> Rocket:
         if self.uranium > 35 and self.fuel > 100:
             self.uranium -= 35
 
@@ -70,6 +111,9 @@ class SpaceBase(Thread):
                 self.fuel -= 100
             else:
                 self.fuel -= 115
+
+            return Rocket(Rockets.LION)
+        return None
 
     def __refuel_oil(self):
         """Recarregar combustível, precisa adquirir o lock da mina de combustível e recarregar"""

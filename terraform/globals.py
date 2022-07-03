@@ -14,6 +14,7 @@ planets = {}
 bases = {}
 mines = {}
 simulation_time = None
+moon_need_resources = False
 
 
 def acquire_print():
