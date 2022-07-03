@@ -24,10 +24,9 @@ class StoreHouse(Thread):
 
     def produce(self):
         if(self.unities < self.constraint):
-            self.unities+=15
+            self.unities += 15
             self.print_store_house()
         sleep(0.001)
-        
 
     def run(self):
         globals.acquire_print()
