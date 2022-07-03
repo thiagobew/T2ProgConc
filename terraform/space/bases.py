@@ -1,3 +1,4 @@
+from Enum.Enum import Bases, Rockets
 import globals
 from threading import Thread
 from space.rocket import Rocket
@@ -17,53 +18,67 @@ class SpaceBase(Thread):
         self.rockets = 0
         self.constraints = [uranium, fuel, rockets]
 
-    def print_space_base_info(self):
-        print(f"🔭 - [{self.name}] → 🪨  {self.uranium}/{self.constraints[0]} URANIUM  ⛽ {self.fuel}/{self.constraints[1]}  🚀 {self.rockets}/{self.constraints[2]}")
-
-    def base_rocket_resources(self, rocket_name):
-        match rocket_name:
-            case 'DRAGON':
-                if self.uranium > 35 and self.fuel > 50:
-                    self.uranium = self.uranium - 35
-                    if self.name == 'ALCANTARA':
-                        self.fuel = self.fuel - 70
-                    elif self.name == 'MOON':
-                        self.fuel = self.fuel - 50
-                    else:
-                        self.fuel = self.fuel - 100
-            case 'FALCON':
-                if self.uranium > 35 and self.fuel > 90:
-                    self.uranium = self.uranium - 35
-                    if self.name == 'ALCANTARA':
-                        self.fuel = self.fuel - 100
-                    elif self.name == 'MOON':
-                        self.fuel = self.fuel - 90
-                    else:
-                        self.fuel = self.fuel - 120
-            case 'LION':
-                if self.uranium > 35 and self.fuel > 100:
-                    self.uranium = self.uranium - 35
-                    if self.name == 'ALCANTARA':
-                        self.fuel = self.fuel - 100
-                    else:
-                        self.fuel = self.fuel - 115
-            case _:
-                print("Invalid rocket name")
-
-    def refuel_oil():
-        pass
-
-    def refuel_uranium():
-        pass
-
     def run(self):
         globals.acquire_print()
-        self.print_space_base_info()
+        self.__print_space_base_info()
         globals.release_print()
 
-        while(globals.get_release_system() == False):
+        while (globals.get_release_system() == False):
             pass
 
-        while(True):
-
+        # Só pode ser lançado um foguete por vez
+        while True:
             pass
+
+    def base_rocket_resources(self, rocket: Rockets):
+        if rocket == Rockets.DRAGON:
+            self.__create_dragon_rocket()
+        elif rocket == Rockets.FALCON:
+            self.__create_falcon_rocket()
+        elif rocket == Rockets.LION:
+            self.__create_lion_rocket()
+        else:
+            print('Invalid rocket name')
+
+    def __create_dragon_rocket(self):
+        if self.uranium > 35 and self.fuel > 50:
+            self.uranium -= 35
+
+            if self.name == Bases.ALCANTARA:
+                self.fuel -= 70
+            elif self.name == Bases.MOON:
+                self.fuel -= 50
+            else:
+                self.fuel -= 100
+
+    def __create_falcon_rocket(self):
+        if self.uranium > 35 and self.fuel > 90:
+            self.uranium -= 35
+
+            if self.name == Bases.ALCANTARA:
+                self.fuel -= 100
+            elif self.name == Bases.MOON:
+                self.fuel -= 90
+            else:
+                self.fuel -= 120
+
+    def __create_lion_rocket(self):
+        if self.uranium > 35 and self.fuel > 100:
+            self.uranium -= 35
+
+            if self.name == Bases.ALCANTARA:
+                self.fuel -= 100
+            else:
+                self.fuel -= 115
+
+    def __refuel_oil(self):
+        """Recarregar combustível, precisa adquirir o lock da mina de combustível e recarregar"""
+        if (self.name == ''):
+            pass
+
+    def __refuel_uranium(self):
+        """Recarregar urânio, precisa adquirir o lock da mina de urânio e recarregar"""
+        pass
+
+    def __print_space_base_info(self):
+        print(f"🔭 - [{self.name}] → 🪨  {self.uranium}/{self.constraints[0]} URANIUM  ⛽ {self.fuel}/{self.constraints[1]}  🚀 {self.rockets}/{self.constraints[2]}")

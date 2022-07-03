@@ -24,7 +24,7 @@ class Pipeline(Thread):
         )
 
     def produce(self):
-        if(self.unities < self.constraint):
+        if (self.unities < self.constraint):
             self.unities += 17
             self.print_pipeline()
         sleep(0.001)
@@ -34,8 +34,8 @@ class Pipeline(Thread):
         self.print_pipeline()
         globals.release_print()
 
-        while(globals.get_release_system() == False):
+        while (globals.get_release_system() == False):
             pass
 
-        while(True):
+        while True:
             self.produce()
