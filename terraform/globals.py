@@ -16,7 +16,6 @@ mines = {}
 simulation_time = None
 moon_need_resources = False
 
-
 def acquire_print():
     global mutex_print
     mutex_print.acquire()

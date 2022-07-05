@@ -1,4 +1,4 @@
-from threading import Thread
+from threading import Thread, Lock
 import globals
 
 
@@ -12,24 +12,23 @@ class Planet(Thread):
         self.terraform = terraform
         self.name = name
 
-    def nuke_detected(self):
-        while (self.terraform > 0):
-            before_percentage = self.terraform
-            while (before_percentage == self.terraform):
-                pass
-            print(
-                f"[NUKE DETECTION] - The planet {self.name} was bombed. {self.terraform}% UNHABITABLE")
+    def nuke_detected(self, damage, lock):
+        self.terraform -= damage
+        lock.release()
+        print(
+            f"[NUKE DETECTION] - The planet {self.name} was bombed by {damage}. {self.terraform}% UNHABITABLE")
 
     def print_planet_info(self):
         print(f"🪐 - [{self.name}] → {self.terraform}% UNINHABITABLE")
 
     def run(self):
+        # Criando mutex para proteger int terraform
+        planets = globals.get_planets_ref()
+        planets[self.name]["terraformMutex"] = Lock()
+
         globals.acquire_print()
         self.print_planet_info()
         globals.release_print()
 
         while (globals.get_release_system() == False):
             pass
-
-        while True:
-            self.nuke_detected()

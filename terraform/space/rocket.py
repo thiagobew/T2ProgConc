@@ -1,5 +1,6 @@
 from random import randrange, random
 from time import sleep
+import globals
 
 
 class Rocket:
@@ -15,21 +16,34 @@ class Rocket:
             self.uranium_cargo = 0
 
     def nuke(self, planet):  # Permitida a alteração
-        self.damage()
+        terraformMutex = globals.get_planets_ref()[
+            planet.name]["terraformMutex"]
+
         print(
             f"[EXPLOSION] - The {self.name} ROCKET reached the planet {planet.name} on North Pole")
         print(
             f"[EXPLOSION] - The {self.name} ROCKET reached the planet {planet.name} on South Pole")
-        pass
+
+        while planet.terraform > 0:
+            terraformMutex.acquire()
+            planet.nuke_detected(self.damage(), terraformMutex)
 
     def voyage(self, planet):  # Permitida a alteração (com ressalvas)
+        if self.name == "LION":
+            # Nesse caso, o planeta é a base lunar
+            moonBase = planet
 
-        # Essa chamada de código (do_we_have_a_problem e simulation_time_voyage) não pode ser retirada.
-        # Você pode inserir código antes ou depois dela e deve
-        # usar essa função.
-        self.simulation_time_voyage(planet)
-        failure = self.do_we_have_a_problem()
-        self.nuke(planet)
+            # 4 dias de viagem
+            sleep(0.011)
+            failure = self.do_we_have_a_problem()
+
+        else:
+            # Essa chamada de código (do_we_have_a_problem e simulation_time_voyage) não pode ser retirada.
+            # Você pode inserir código antes ou depois dela e deve
+            # usar essa função.
+            self.simulation_time_voyage(planet)
+            failure = self.do_we_have_a_problem()
+            self.nuke(planet)
 
     ####################################################
     #                   ATENÇÃO                        #
@@ -38,7 +52,8 @@ class Rocket:
 
     def simulation_time_voyage(self, planet):
         if planet.name == 'MARS':
-            sleep(2)  # Marte tem uma distância aproximada de dois anos do planeta Terra.
+            # Marte tem uma distância aproximada de dois anos do planeta Terra.
+            sleep(2)
         else:
             # IO, Europa e Ganimedes tem uma distância aproximada de cinco anos do planeta Terra.
             sleep(5)
@@ -61,7 +76,8 @@ class Rocket:
 
     def successfully_launch(self, base):
         if random() <= 0.1:
-            print(f"[LAUNCH FAILED] - {self.name} ROCKET id:{self.id} on {base.name}")
+            print(
+                f"[LAUNCH FAILED] - {self.name} ROCKET id:{self.id} on {base.name}")
             return False
         return True
 
