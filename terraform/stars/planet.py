@@ -24,7 +24,7 @@ class Planet(Thread):
     def run(self):
         # Criando mutex para proteger int terraform
         planets = globals.get_planets_ref()
-        planets[self.name]["terraformMutex"] = Lock()
+        # planets[self.name]["terraformMutex"] = Lock()
 
         globals.acquire_print()
         self.print_planet_info()

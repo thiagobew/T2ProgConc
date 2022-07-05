@@ -1,128 +1,119 @@
 from typing import List
+from Abstractions.AbstractSpaceBase import AbstractSpaceBase
 from Enum.Enum import Bases, Rockets
+from threading import Thread, Lock, Condition
+from space.BaseThreads.BaseEngineering import BaseEngineeringThread
+from space.BaseThreads.BaseLauncher import BaseLauncherThread
+from space.BaseThreads.BaseMining import BaseMiningThread
+
 import globals
-from threading import Thread
-from space.rocket import Rocket
-from random import choice
 
 
-class SpaceBase(Thread):
+class SpaceBase(Thread, AbstractSpaceBase):
 
     ################################################
     # O CONSTRUTOR DA CLASSE NÃO PODE SER ALTERADO #
     ################################################
     def __init__(self, name, uranium, fuel, rockets):
         Thread.__init__(self)
-        self.name = name
-        self.uranium = 0
-        self.fuel = 0
+        self.__name = name
+        self.__uranium = 0
+        self.__fuel = 0
         self.rockets = 0
-        self.constraints = [uranium, fuel, rockets]
+        self.__constraints = [uranium, fuel, rockets]
 
     def run(self):
+        self.__maximumStorageRockets = self.__getRocketsStorageLimit()
+
+        # Controle de concorrência para a mineração de recursos e criação de foguetes
+        self.__resourcesMutex = Lock()
+        self.__resourcesToCreateRockets = Condition(self.__resourcesMutex)
+        self.__resourcesStorageFull = Condition(self.__resourcesMutex)
+
+        # Controle de concorrência para a criação e lançamento de foguetes
+        self.__storage: List[Rockets] = []
+        self.__storageMutex = Lock()
+        self.__spaceForAnotherRocket = Condition(self.__storageMutex)
+        self.__rocketInStorage = Condition(self.__storageMutex)
+
+        # Cria as threads que irão trabalhar dentro da base
+        self.baseMining = BaseMiningThread(baseInstance=self)
+        self.baseAttacker = BaseLauncherThread(baseInstance=self)
+        self.baseEngineering = BaseEngineeringThread(baseInstance=self)
+
+        # Inicia elas
+        self.baseMining.start()
+        self.baseAttacker.start()
+        self.baseEngineering.start()
+
         globals.acquire_print()
         self.__print_space_base_info()
         globals.release_print()
 
-        self.need_resources = False
-        self.rockets_list: List[Rocket] = []
+        # Espera pelas bases
+        self.baseMining.join()
+        self.baseAttacker.join()
+        self.baseEngineering.join()
 
-        while (globals.get_release_system() == False):
-            pass
-
-        # Só pode ser lançado um foguete por vez
-        while True:
-            if self.name == Bases.MOON:
-                self.__earth_bases_run()
-            else:
-                self.__moon_bases_run()
-
-    def __moon_bases_run(self):
-        if self.uranium == 0 or self.fuel == 0:
-            globals.moon_need_resources = True
+    def __getRocketsStorageLimit(self) -> int:
+        if self.__name == Bases.ALCANTARA:
+            return 1
+        elif self.__name == Bases.MOON:
+            return 2
         else:
-            self.__attack_a_planet()
-
-    def __earth_bases_run(self):
-        if globals.moon_need_resources:
-            self.__send_resources_to_moon()
-        else:
-            self.__attack_a_planet()
-
-    def __send_resources_to_moon(self):
-        rocket = self.__create_lion_rocket()
-        if rocket is None:  # No resources for the rocket
-            pass  # Coletar recurso de alguma base
-        else:
-            rocket.voyage(Bases.MOON)
-
-    def __attack_a_planet(self):
-        rocket_name = choice(Rockets.DRAGON, Rockets.FALCON)
-        rocket = self.__create_rocket(rocket_name)
-
-        if rocket is None:  # No resources for the rocket
-            pass  # Coletar recurso de alguma base
-        else:
-            rocket.voyage()
-
-    def __create_rocket(self, rocket_name: Rockets) -> Rocket:
-        if rocket_name == Rockets.DRAGON:
-            return self.__create_dragon_rocket()
-        elif rocket_name == Rockets.FALCON:
-            return self.__create_falcon_rocket()
-        elif rocket_name == Rockets.LION:
-            return self.__create_lion_rocket()
-        else:
-            print('Invalid rocket name')
-
-    def __create_dragon_rocket(self) -> Rocket:
-        if self.uranium > 35 and self.fuel > 50:
-            self.uranium -= 35
-
-            if self.name == Bases.ALCANTARA:
-                self.fuel -= 70
-            elif self.name == Bases.MOON:
-                self.fuel -= 50
-            else:
-                self.fuel -= 100
-
-            return Rocket(Rockets.DRAGON)
-        return None
-
-    def __create_falcon_rocket(self) -> Rocket:
-        if self.uranium > 35 and self.fuel > 90:
-            self.uranium -= 35
-
-            if self.name == Bases.ALCANTARA:
-                self.fuel -= 100
-            elif self.name == Bases.MOON:
-                self.fuel -= 90
-            else:
-                self.fuel -= 120
-
-            return Rocket(Rockets.FALCON)
-        return None
-
-    def __create_lion_rocket(self) -> Rocket:
-        if self.uranium > 35 and self.fuel > 100:
-            self.uranium -= 35
-
-            if self.name == Bases.ALCANTARA:
-                self.fuel -= 100
-            else:
-                self.fuel -= 115
-
-            return Rocket(Rockets.LION)
-        return None
-
-    def __refuel_oil(self):
-        """Recarregar combustível, precisa adquirir o lock da mina de combustível e recarregar"""
-        if (self.name == ''):
-            pass
-
-    def __refuel_uranium(self):
-        """Recarregar urânio, precisa adquirir o lock da mina de urânio e recarregar"""
-        pass
+            return 5
 
     def __print_space_base_info(self):
-        print(f"🔭 - [{self.name}] → 🪨  {self.uranium}/{self.constraints[0]} URANIUM  ⛽ {self.fuel}/{self.constraints[1]}  🚀 {self.rockets}/{self.constraints[2]}")
+        print(f"🔭 - [{self.__name}] → 🪨  {self.__uranium}/{self.__constraints[0]} URANIUM  ⛽ {self.fuel}/{self.__constraints[1]}  🚀 {self.rockets}/{self.__constraints[2]}")
+
+    @property
+    def storageMutex(self) -> Lock:
+        return self.__storageMutex
+
+    @property
+    def spaceForAnotherRocket(self) -> Condition:
+        return self.__spaceForAnotherRocket
+
+    @property
+    def rocketInStorage(self) -> Condition:
+        return self.__rocketInStorage
+
+    @property
+    def resourcesStorageFull(self) -> Condition:
+        return self.__resourcesStorageFull
+
+    @property
+    def resourcesToCreateRockets(self) -> Condition:
+        return self.__resourcesToCreateRockets
+
+    @property
+    def storage(self) -> List[Rockets]:
+        return self.__storage
+
+    @property
+    def resourcesMutex(self) -> Lock:
+        return self.__resourcesMutex
+
+    @property
+    def storageLimit(self) -> Lock:
+        return self.__maximumStorageRockets
+
+    @property
+    def uranium(self) -> int:
+        return self.__uranium
+
+    @property
+    def fuel(self) -> int:
+        return self.__fuel
+
+    @property
+    def fuelLimit(self) -> int:
+        return self.__constraints[1]
+
+    @property
+    def uraniumLimit(self) -> int:
+        return self.__constraints[0]
+
+    @property
+    def name(self) -> str:
+        return self.__name
