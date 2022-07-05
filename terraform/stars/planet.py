@@ -1,8 +1,9 @@
 from threading import Thread, Lock
+from Abstractions.AbstractPlanet import AbstractPlanet
 import globals
 
 
-class Planet(Thread):
+class Planet(Thread, AbstractPlanet):
 
     ################################################
     # O CONSTRUTOR DA CLASSE NÃO PODE SER ALTERADO #
@@ -12,13 +13,13 @@ class Planet(Thread):
         self.terraform = terraform
         self.name = name
 
-    def nuke_detected(self, damage, lock):
+    def nukeDetected(self, damage, lock):
         self.terraform -= damage
         lock.release()
         print(
             f"[NUKE DETECTION] - The planet {self.name} was bombed by {damage}. {self.terraform}% UNHABITABLE")
 
-    def print_planet_info(self):
+    def printPlanetInfo(self):
         print(f"🪐 - [{self.name}] → {self.terraform}% UNINHABITABLE")
 
     def run(self):
@@ -27,7 +28,7 @@ class Planet(Thread):
         # planets[self.name]["terraformMutex"] = Lock()
 
         globals.acquire_print()
-        self.print_planet_info()
+        self.printPlanetInfo()
         globals.release_print()
 
         while (globals.get_release_system() == False):

@@ -2,9 +2,10 @@ from enum import Enum
 
 
 class Planets(Enum):
-    IO = 'Io'
-    GANIMEDES = 'Ganimedes'
-    EUROPA = 'Europa'
+    IO = 'io'
+    MARS = 'mars'
+    GANIMEDES = 'ganimedes'
+    EUROPA = 'europa'
 
 
 class Rockets(Enum):
@@ -14,7 +15,12 @@ class Rockets(Enum):
 
 
 class Bases(Enum):
-    ALCANTARA = 'Alcantara'
-    MOSCOW = 'Moscow'
-    CANAVERAL = 'Canaveral'
-    MOON = 'Moon'
+    ALCANTARA = 'alcantara'
+    MOSCOW = 'moscow'
+    CANAVERAL = 'canaveral_cape'
+    MOON = 'moon'
+
+
+class Mines(Enum):
+    FUEL = 'oil_earth'
+    URANIUM = 'uranium_earth'
