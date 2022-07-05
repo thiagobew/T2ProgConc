@@ -102,9 +102,17 @@ class SpaceBase(Thread, AbstractSpaceBase):
     def uranium(self) -> int:
         return self.__uranium
 
+    @uranium.setter
+    def uranium(self, newUranium) -> None:
+        self.__uranium = newUranium
+
     @property
     def fuel(self) -> int:
         return self.__fuel
+
+    @fuel.setter
+    def fuel(self, newFuel) -> None:
+        self.__fuel = newFuel
 
     @property
     def fuelLimit(self) -> int:
