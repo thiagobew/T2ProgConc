@@ -35,8 +35,11 @@ class Rocket:
 
             # 4 dias de viagem
             sleep(0.011)
-            failure = self.do_we_have_a_problem()
+            self.do_we_have_a_problem()
 
+            # Precisa de proteção?
+            moonBase.uranium += self.uranium
+            moonBase.fuel += self.fuel
         else:
             # Essa chamada de código (do_we_have_a_problem e simulation_time_voyage) não pode ser retirada.
             # Você pode inserir código antes ou depois dela e deve
