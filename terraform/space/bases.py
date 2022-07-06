@@ -28,7 +28,7 @@ class SpaceBase(Thread, AbstractSpaceBase):
         # Controle de concorrência para a mineração de recursos e criação de foguetes
         self.__resourcesMutex = Lock()
         self.__resourcesToCreateRockets = Condition(self.__resourcesMutex)
-        self.__resourcesStorageFull = Condition(self.__resourcesMutex)
+        self.__spaceInResourcesStorage = Condition(self.__resourcesMutex)
 
         # Controle de concorrência para a criação e lançamento de foguetes
         self.__storage: List[Rockets] = []
@@ -47,7 +47,7 @@ class SpaceBase(Thread, AbstractSpaceBase):
         self.baseEngineering.start()
 
         globals.acquire_print()
-        self.__print_space_base_info()
+        self.printSpaceBaseInfo()
         globals.release_print()
 
         # Espera pelas bases
@@ -63,8 +63,8 @@ class SpaceBase(Thread, AbstractSpaceBase):
         else:
             return 5
 
-    def __print_space_base_info(self):
-        print(f"🔭 - [{self.__name}] → 🪨  {self.__uranium}/{self.__constraints[0]} URANIUM  ⛽ {self.fuel}/{self.__constraints[1]}  🚀 {self.rockets}/{self.__constraints[2]}")
+    def printSpaceBaseInfo(self):
+        print(f"🔭 - [{self.__name}] → 🪨  {self.__uranium}/{self.__constraints[0]} URANIUM  ⛽ {self.fuel}/{self.__constraints[1]}  🚀 {len(self.__storage)}/{self.__constraints[2]}")
 
     @property
     def storageMutex(self) -> Lock:
@@ -79,8 +79,8 @@ class SpaceBase(Thread, AbstractSpaceBase):
         return self.__rocketInStorage
 
     @property
-    def resourcesStorageFull(self) -> Condition:
-        return self.__resourcesStorageFull
+    def spaceInResourcesStorage(self) -> Condition:
+        return self.__spaceInResourcesStorage
 
     @property
     def resourcesToCreateRockets(self) -> Condition:
@@ -95,7 +95,7 @@ class SpaceBase(Thread, AbstractSpaceBase):
         return self.__resourcesMutex
 
     @property
-    def storageLimit(self) -> Lock:
+    def storageLimit(self) -> int:
         return self.__maximumStorageRockets
 
     @property

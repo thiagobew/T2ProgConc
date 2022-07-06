@@ -36,7 +36,7 @@ class AbstractSpaceBase(ABC):
 
     @property
     @abstractmethod
-    def resourcesStorageFull(self) -> Condition:
+    def spaceInResourcesStorage(self) -> Condition:
         pass
 
     @property

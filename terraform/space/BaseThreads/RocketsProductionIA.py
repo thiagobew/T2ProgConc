@@ -1,4 +1,4 @@
-from secrets import choice
+from random import choice
 from Enum.Enum import Bases, Rockets
 from space.rocket import Rocket
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
@@ -25,7 +25,13 @@ class RocketsProductionIA():
         return True
 
     def createRocketToAttack(self) -> Rocket:
-        rocketName = choice(Rockets.DRAGON, Rockets.FALCON)
+        rocketsToChoice = []
+        if self.__hasResourcesToCreateDragon():
+            rocketsToChoice.append(Rockets.DRAGON)
+        if self.__hasResourcesToCreateFalcon():
+            rocketsToChoice.append(Rockets.FALCON)
+
+        rocketName = choice(rocketsToChoice)
         if rocketName == Rockets.DRAGON:
             return self.__createDragonRocket()
         else:
@@ -46,13 +52,13 @@ class RocketsProductionIA():
         return True
 
     def createRocketLion(self) -> Rocket:
-        if self.uranium > 35 and self.fuel > 100:
-            self.uranium -= 35
+        if self.base.uranium > 35 and self.base.fuel > 100:
+            self.base.uranium -= 35
 
-            if self.name == Bases.ALCANTARA:
-                self.fuel -= 100
+            if self.base.name == Bases.ALCANTARA:
+                self.base.fuel -= 100
             else:
-                self.fuel -= 115
+                self.base.fuel -= 115
 
             return Rocket(Rockets.LION)
         return None
@@ -60,9 +66,9 @@ class RocketsProductionIA():
     def __createFalconRocket(self) -> Rocket:
         self.base.uranium -= 35
 
-        if self.name == Bases.ALCANTARA:
+        if self.base.name == Bases.ALCANTARA:
             self.base.fuel -= 100
-        elif self.name == Bases.MOON:
+        elif self.base.name == Bases.MOON:
             self.base.fuel -= 90
         else:
             self.base.fuel -= 120
@@ -70,13 +76,45 @@ class RocketsProductionIA():
         return Rocket(Rockets.FALCON)
 
     def __createDragonRocket(self) -> Rocket:
-        self.uranium -= 35
+        self.base.uranium -= 35
 
-        if self.name == Bases.ALCANTARA:
-            self.fuel -= 70
-        elif self.name == Bases.MOON:
-            self.fuel -= 50
+        if self.base.name == Bases.ALCANTARA:
+            self.base.fuel -= 70
+        elif self.base.name == Bases.MOON:
+            self.base.fuel -= 50
         else:
-            self.fuel -= 100
+            self.base.fuel -= 100
 
         return Rocket(Rockets.DRAGON)
+
+    def __hasResourcesToCreateDragon(self) -> bool:
+        if self.base.uranium < 35:
+            return False
+
+        requiredFuel = 0
+        if self.base.name == Bases.ALCANTARA:
+            requiredFuel = 70
+        elif self.base.name == Bases.MOON:
+            requiredFuel = 50
+        else:
+            requiredFuel = 100
+
+        if self.base.fuel < requiredFuel:
+            return False
+        return True
+
+    def __hasResourcesToCreateFalcon(self) -> bool:
+        if self.base.uranium < 35:
+            return False
+
+        requiredFuel = 0
+        if self.base.name == Bases.ALCANTARA:
+            requiredFuel = 100
+        elif self.base.name == Bases.MOON:
+            requiredFuel = 90
+        else:
+            requiredFuel = 120
+
+        if self.base.fuel < requiredFuel:
+            return False
+        return True
