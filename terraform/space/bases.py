@@ -4,7 +4,8 @@ from Enum.Enum import Bases, Rockets
 from threading import Thread, Lock, Condition
 from space.BaseThreads.BaseEngineering import BaseEngineeringThread
 from space.BaseThreads.BaseLauncher import BaseLauncherThread
-from space.BaseThreads.BaseMining import BaseMiningThread
+from space.BaseThreads.EarthBaseMining import EarthBaseMiningThread
+from space.BaseThreads.MoonBaseMining import MoonBaseMiningThread
 
 import globals
 
@@ -37,7 +38,10 @@ class SpaceBase(Thread, AbstractSpaceBase):
         self.__rocketInStorage = Condition(self.__storageMutex)
 
         # Cria as threads que irão trabalhar dentro da base
-        self.baseMining = BaseMiningThread(baseInstance=self)
+        if self.__name == Bases.MOON:
+            self.baseMining = MoonBaseMiningThread(baseInstance=self)
+        else:
+            self.baseMining = EarthBaseMiningThread(baseInstance=self)
         self.baseAttacker = BaseLauncherThread(baseInstance=self)
         self.baseEngineering = BaseEngineeringThread(baseInstance=self)
 
@@ -62,6 +66,10 @@ class SpaceBase(Thread, AbstractSpaceBase):
             return 2
         else:
             return 5
+
+    def receiveLionRocket(self) -> None:
+        if self.__name == Bases.MOON:
+            self.baseMining.storeSuppliesOfLionRocket()
 
     def printSpaceBaseInfo(self):
         print(f"🔭 - [{self.__name}] → 🪨  {self.__uranium}/{self.__constraints[0]} URANIUM  ⛽ {self.fuel}/{self.__constraints[1]}  🚀 {len(self.__storage)}/{self.__constraints[2]}")

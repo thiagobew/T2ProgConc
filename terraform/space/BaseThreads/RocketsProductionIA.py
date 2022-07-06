@@ -52,16 +52,18 @@ class RocketsProductionIA():
         return True
 
     def createRocketLion(self) -> Rocket:
-        if self.base.uranium > 35 and self.base.fuel > 100:
-            self.base.uranium -= 35
+        if self.base.uranium < 35 or self.base.fuel < 100:
+            print(f'[ERRO] - [{self.base.name}] - Tentativa de criar Lion sem recursos necessários')
+            return None
 
-            if self.base.name == Bases.ALCANTARA:
-                self.base.fuel -= 100
-            else:
-                self.base.fuel -= 115
+        self.base.uranium -= 35
 
-            return Rocket(Rockets.LION)
-        return None
+        if self.base.name == Bases.ALCANTARA:
+            self.base.fuel -= 100
+        else:
+            self.base.fuel -= 115
+
+        return Rocket(Rockets.LION)
 
     def __createFalconRocket(self) -> Rocket:
         self.base.uranium -= 35

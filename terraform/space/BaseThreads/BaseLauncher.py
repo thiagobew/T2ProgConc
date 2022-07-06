@@ -27,22 +27,23 @@ class BaseLauncherThread(Thread):
             # Posiciona um foguete na plataforma de lançamento quando disponível
             with self.base.storageMutex:
                 if len(self.base.storage) == 0:
-                    print(f'[{self.base.name}-Launcher] -> No Rockets, esperando...')
+                    # print(f'[{self.base.name}-Launcher] -> No Rockets, esperando...')
                     self.base.rocketInStorage.wait()
 
-                self.__rocketInPlatform = self.base.storage.pop()
+                self.__rocketInPlatform = self.base.storage.pop(0)
 
             # Efetua o lançamento do foguete
             self.__launchRocket()
             with self.base.storageMutex:
-                print(f'[{self.base.name}-Launcher] -> Lançando foguete!')
                 self.base.spaceForAnotherRocket.notify()
 
     def __launchRocket(self):
         if self.__rocketInPlatform.name == Rockets.LION:
+            print(f'[{self.base.name} - Launcher] -> Lançando Foguete para a Lua')
             # self.__rocketInPlatform.voyage(Bases.MOON)
             pass
         else:
+            print(f'[{self.base.name} - Launcher] -> Atacando planetas')
             destiny = self.__getRocketDestiny()
             # self.__rocketInPlatform.voyage(destiny)
             pass

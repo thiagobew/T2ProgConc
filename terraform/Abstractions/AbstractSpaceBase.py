@@ -11,6 +11,11 @@ class AbstractSpaceBase(ABC):
 
     @property
     @abstractmethod
+    def receiveLionRocket(self) -> None:
+        pass
+
+    @property
+    @abstractmethod
     def storageMutex(self) -> Lock:
         pass
 

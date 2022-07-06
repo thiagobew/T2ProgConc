@@ -8,8 +8,8 @@ import globals
 from space.BaseThreads.RocketsProductionIA import RocketsProductionIA
 
 
-class BaseMiningThread(Thread):
-    """Classe para controlar o processo de mineração para uma base espacial"""
+class EarthBaseMiningThread(Thread):
+    """Classe para controlar o processo de mineração para uma base espacial na terra"""
 
     def __init__(self, baseInstance: AbstractSpaceBase, target=None, name=None, args=None,  kwargs=None, daemon=None) -> None:
         self.base: AbstractSpaceBase = baseInstance
@@ -70,7 +70,7 @@ class BaseMiningThread(Thread):
         # Verifica quanto de fuel é possível extrair e armazenar
         quantToExtract = min(fuelRequired, fuelMine.unities)
         fuelMine.unities -= quantToExtract
-        sleep(1)
+        sleep(2)
 
         # Libera a mina de fuel
         MinesSync().fuelMineMutex.release()
@@ -93,7 +93,7 @@ class BaseMiningThread(Thread):
         # Verifica quanto de fuel é possível extrair
         quantToExtract = min(requiredUranium, uraniumMine.unities)
         uraniumMine.unities -= quantToExtract
-        sleep(1)
+        sleep(2)
 
         # globals.acquire_print()
         # print(f'[{self.base.name} - MINING] -> Liberando mina de Uranium')

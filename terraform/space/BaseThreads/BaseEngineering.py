@@ -1,6 +1,7 @@
 from threading import Thread
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
 from Enum.Enum import Bases
+from Synchronization.MoonResourcesSync import MoonSupplySync
 from space.BaseThreads.RocketsProductionIA import RocketsProductionIA
 from space.rocket import Rocket
 
@@ -12,6 +13,7 @@ class BaseEngineeringThread(Thread):
 
     def __init__(self, baseInstance: AbstractSpaceBase, target=None, name=None, args=None,  kwargs=None, daemon=None) -> None:
         self.base: AbstractSpaceBase = baseInstance
+        self.moonSupplierIA = MoonSupplySync()
         self.attackerIA = RocketsProductionIA(self.base)
         super().__init__(None, target, name, args, kwargs, daemon=daemon)
 
@@ -25,33 +27,33 @@ class BaseEngineeringThread(Thread):
             # Adquire o mutex para acessar o estoque de foguetes
             with self.base.storageMutex:
                 if len(self.base.storage) == self.base.storageLimit:
-                    print(f'[{self.base.name}-Engineering] -> NO SPACE FOR ROCKET!! Esperando...')
+                    # print(f'[{self.base.name}-Engineering] -> NO SPACE FOR ROCKET!! Esperando...')
                     self.base.spaceForAnotherRocket.wait()
 
             # Adquire mutex para acessar os recursos
             with self.base.resourcesMutex:
                 # Aguarda possuir recursos suficientes para criar Lion por meio de Condition
-                if globals.moon_need_resources and self.base.name != Bases.MOON:
+                if self.moonSupplierIA.moonNeedSupplies and self.base.name != Bases.MOON:
                     while not self.attackerIA.hasResourcesToCreateLion():
-                        print(f'[{self.base.name}-Engineering] -> NO RESOURCES TO LION!!, esperando...')
+                        # print(f'[{self.base.name}-Engineering] -> NO RESOURCES TO LION!!, esperando...')
                         self.base.resourcesToCreateRockets.wait()
                         continue
 
                 # Aguarda possuir recursos suficientes para atacar por meio de Condition
                 else:
                     while not self.attackerIA.hasResourcesToAttack():
-                        print(f'[{self.base.name}-Engineering] -> NO RESOURCES TO ATTACK!!, esperando...')
+                        # print(f'[{self.base.name}-Engineering] -> NO RESOURCES TO ATTACK!!, esperando...')
                         self.base.resourcesToCreateRockets.wait()
                         continue
 
-            print(f'[{self.base.name} - Engineering] -> CRIANDO FOGUETE!!')
+            # print(f'[{self.base.name} - Engineering] -> CRIANDO FOGUETE!!')
             # Cria foguete necessário, adiciona ao estoque e notifica departamento de lançamento
             with self.base.storageMutex:
                 self.base.storage.append(self.__createRocket())
                 self.base.rocketInStorage.notify()
 
     def __createRocket(self) -> Rocket:
-        if self.base.name != Bases.MOON and globals.moon_need_resources:
+        if self.base.name != Bases.MOON and self.moonSupplierIA.moonNeedSupplies:
             return self.attackerIA.createRocketLion()
 
         return self.attackerIA.createRocketToAttack()
