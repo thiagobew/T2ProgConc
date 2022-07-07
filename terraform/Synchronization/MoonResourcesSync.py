@@ -1,4 +1,4 @@
-from threading import Condition, Lock
+from threading import BoundedSemaphore, Condition, Lock, Semaphore
 from Config.Singleton import Singleton
 
 
@@ -6,8 +6,9 @@ class MoonSupplySync(Singleton):
     def __init__(self) -> None:
         if not super().created:
             self.__moonNeedSupplies = False
-            self.__moonSupplyMutex = Lock()
-            self.__resourcesArrived = Condition(self.__moonSupplyMutex)
+            self.__moonSuppliesMutex = Lock()
+            self.__supplierSem = Semaphore(0)
+            self.__resourcesArrived = Condition(self.__moonSuppliesMutex)
 
     @property
     def moonNeedSupplies(self) -> bool:
@@ -18,8 +19,12 @@ class MoonSupplySync(Singleton):
         self.__moonNeedSupplies = need
 
     @property
-    def moonSupplyMutex(self) -> Lock:
-        return self.__moonSupplyMutex
+    def moonSuppliesMutex(self) -> Lock:
+        return self.__moonSuppliesMutex
+
+    @property
+    def supplierSem(self) -> Semaphore:
+        return self.__supplierSem
 
     @property
     def resourcesArrived(self) -> Condition:

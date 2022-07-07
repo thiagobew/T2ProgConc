@@ -15,7 +15,7 @@ class SpaceBase(Thread, AbstractSpaceBase):
     ################################################
     # O CONSTRUTOR DA CLASSE NÃO PODE SER ALTERADO #
     ################################################
-    def __init__(self, name, uranium, fuel, rockets):
+    def __init__(self, name, fuel, uranium, rockets):
         Thread.__init__(self)
         self.__name = name
         self.__uranium = 0
@@ -33,11 +33,10 @@ class SpaceBase(Thread, AbstractSpaceBase):
 
         # Controle de concorrência para a criação e lançamento de foguetes
         self.__storage: List[Rockets] = []
-        self.__storageMutex = Lock()
-        self.__spaceForAnotherRocket = Condition(self.__storageMutex)
-        self.__rocketInStorage = Condition(self.__storageMutex)
-        self.semSpaceInStorage = BoundedSemaphore(self.__rocketsStorageLimit)
-        self.semRocketInStorage = Semaphore(0)
+        self.__rocketsStorageMutex = Lock()
+        self.__spaceForAnotherRocket = Condition(self.__rocketsStorageMutex)
+        self.__semSpaceInStorage = BoundedSemaphore(self.__rocketsStorageLimit)
+        self.__semRocketInStorage = Semaphore(0)
 
         # Cria as threads que irão trabalhar dentro da base
         if self.__name != Bases.MOON:
@@ -73,22 +72,23 @@ class SpaceBase(Thread, AbstractSpaceBase):
 
     def receiveLionRocket(self) -> None:
         if self.__name == Bases.MOON:
+            print(f'-> Lion aterrissando na Lua')
             self.baseEngineering.storeSuppliesOfLionRocket()
 
     def printSpaceBaseInfo(self):
         print(f"🔭 - [{self.__name}] → 🪨  {self.__uranium}/{self.__constraints[0]} URANIUM  ⛽ {self.fuel}/{self.__constraints[1]}  🚀 {len(self.__storage)}/{self.__constraints[2]}")
 
     @property
-    def storageMutex(self) -> Lock:
-        return self.__storageMutex
+    def rocketsStorageMutex(self) -> Lock:
+        return self.__rocketsStorageMutex
 
     @property
-    def spaceForAnotherRocket(self) -> Condition:
-        return self.__spaceForAnotherRocket
+    def semRocketInStorage(self) -> Semaphore:
+        return self.__semRocketInStorage
 
     @property
-    def rocketInStorage(self) -> Condition:
-        return self.__rocketInStorage
+    def semSpaceInStorage(self) -> Semaphore:
+        return self.__semSpaceInStorage
 
     @property
     def spaceInResourcesStorage(self) -> Condition:

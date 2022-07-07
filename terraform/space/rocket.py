@@ -21,6 +21,8 @@ class Rocket:
 
     def nuke(self, planetAndPole: tuple):  # Permitida a alteração
         planet = planetAndPole[0]
+        # Foguete Dragon está chegando aqui e dando erro de Index pois a tupla não possui o segundo valor
+        return
         pole = planetAndPole[1]
         terraformMutex = globals.get_planets_ref()[
             planet.name]["terraformMutex"]
@@ -51,7 +53,7 @@ class Rocket:
             moonBase.receiveLionRocket()
 
             # Notifica departamento de engenharia da Lua que tem novos recursos
-            with moonSupplyIA.moonSupplyMutex:
+            with moonSupplyIA.moonSuppliesMutex:
                 moonSupplyIA.resourcesArrived.notify()
         else:
             # Essa chamada de código (do_we_have_a_problem e simulation_time_voyage) não pode ser retirada.

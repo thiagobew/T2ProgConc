@@ -33,10 +33,11 @@ class BaseLauncherThread(Thread):
             # Aguarda um foguete no estoque
             self.base.semRocketInStorage.acquire()
 
+            # print(f'[{self.base.name} - Launcher] -> Removendo foguete do Estoque')
             # Remove o foguete do estoque e coloca na plataforma
-            self.base.storageMutex.acquire()
+            self.base.rocketsStorageMutex.acquire()
             self.__rocketInPlatform = self.base.storage.pop(0)
-            self.base.storageMutex.release()
+            self.base.rocketsStorageMutex.release()
 
             # Libera semáforo de espaço vazio no estoque
             self.base.semSpaceInStorage.release()
@@ -45,6 +46,8 @@ class BaseLauncherThread(Thread):
             voyageThread = Thread(target=self.__launchRocket)
             voyageThread.start()
 
+            self.base.printSpaceBaseInfo()
+
     def __launchRocket(self):
         if self.__rocketInPlatform.name == Rockets.LION:
             print(f'[{self.base.name} - Launcher] -> Lançando Foguete para a Lua')
@@ -52,7 +55,7 @@ class BaseLauncherThread(Thread):
 
             self.__rocketInPlatform.voyage((moonBase,))
         else:
-            print(f'[{self.base.name} - Launcher] -> Atacando planetas')
+            print(f'[{self.base.name} - Launcher] -> Foguete lançado')
             return
             semFreePlanets = LaunchSync().semFreePlanets
             semFreePlanets.acquire()

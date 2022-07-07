@@ -26,6 +26,8 @@ class MoonBaseEngineeringThread(Thread):
         while True:
             # Aguarda um lugar vazio no estoque de foguetes
             self.base.semSpaceInStorage.acquire()
+            # print(
+            # f'[MOON] - Tem lugar no estoque de foguetes - {self.base.storageLimit} - {len(self.base.storage)}')
 
             # Acessa o estoque e verifica se possui recursos suficientes, se não irá solicitar recursos e dormir
             hasEnoughResources = False
@@ -34,8 +36,10 @@ class MoonBaseEngineeringThread(Thread):
 
                 # Se não possuir recursos espera
                 if not hasEnoughResources:
-                    with self.moonSupplierIA.moonSupplyMutex:
+                    with self.moonSupplierIA.moonSuppliesMutex:
                         self.moonSupplierIA.moonNeedSupplies = True
+                        # Libera o semáforo para alguma base mandar um foguete para a Lua
+                        self.moonSupplierIA.supplierSem.release()
                         self.moonSupplierIA.resourcesArrived.wait()
 
             # Já adquiriu recursos suficientes para construir Dragon

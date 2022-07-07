@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from threading import Condition, Lock
+from threading import Condition, Lock, Semaphore
 from typing import List
 from space.rocket import Rocket
 
@@ -9,6 +9,14 @@ class AbstractSpaceBase(ABC):
     def run(self):
         pass
 
+    @abstractmethod
+    def printSpaceBaseInfo(self) -> None:
+        pass
+
+    @abstractmethod
+    def receiveLionRocket(self) -> None:
+        pass
+
     @property
     @abstractmethod
     def receiveLionRocket(self) -> None:
@@ -16,7 +24,7 @@ class AbstractSpaceBase(ABC):
 
     @property
     @abstractmethod
-    def storageMutex(self) -> Lock:
+    def rocketsStorageMutex(self) -> Lock:
         pass
 
     @property
@@ -26,12 +34,12 @@ class AbstractSpaceBase(ABC):
 
     @property
     @abstractmethod
-    def spaceForAnotherRocket(self) -> Condition:
+    def semSpaceInStorage(self) -> Semaphore:
         pass
 
     @property
     @abstractmethod
-    def rocketInStorage(self) -> Condition:
+    def semRocketInStorage(self) -> Semaphore:
         pass
 
     @property
