@@ -50,7 +50,7 @@ class SpaceBase(Thread, AbstractSpaceBase):
         # Inicia elas
         if self.__name != Bases.MOON:
             self.baseMining.start()
-            self.baseEngineering.start()
+        self.baseEngineering.start()
         self.baseAttacker.start()
 
         globals.acquire_print()
@@ -60,7 +60,7 @@ class SpaceBase(Thread, AbstractSpaceBase):
         # Espera pelas bases
         if self.__name != Bases.MOON:
             self.baseMining.join()
-            self.baseEngineering.join()
+        self.baseEngineering.join()
         self.baseAttacker.join()
 
     def __getRocketsStorageLimit(self) -> int:
@@ -73,7 +73,7 @@ class SpaceBase(Thread, AbstractSpaceBase):
 
     def receiveLionRocket(self) -> None:
         if self.__name == Bases.MOON:
-            self.baseMining.storeSuppliesOfLionRocket()
+            self.baseEngineering.storeSuppliesOfLionRocket()
 
     def printSpaceBaseInfo(self):
         print(f"🔭 - [{self.__name}] → 🪨  {self.__uranium}/{self.__constraints[0]} URANIUM  ⛽ {self.fuel}/{self.__constraints[1]}  🚀 {len(self.__storage)}/{self.__constraints[2]}")

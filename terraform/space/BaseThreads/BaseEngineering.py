@@ -27,29 +27,29 @@ class EarthBaseEngineeringThread(Thread):
             # Aguarda um lugar vazio no estoque de foguetes
             self.base.semSpaceInStorage.acquire()
 
-            # Adquire mutex para acessar os recursos
-            # Ele é notificado sempre que novos recursos são adicionados, por isso o mecanismo while not e continue
-            # para quando ele acordar verificar se já existe recursos suficientes e prosseguir com a criação
-            with self.base.resourcesMutex:
-                # Aguarda possuir recursos suficientes para criar Lion por meio de Condition
-                if self.moonSupplierIA.moonNeedSupplies and self.base.name != Bases.MOON:
-                    while not self.attackerIA.hasResourcesToCreateLion():
-                        # print(f'[{self.base.name}-Engineering] -> NO RESOURCES TO LION!!, esperando...')
-                        self.base.resourcesToCreateRockets.wait()
-                        continue
+            # Espera pela quantidade necessária de recursos para criar foguete
+            hasEnoughResources = False
+            while not hasEnoughResources:
+                # Adquire mutex para analisar o estoque
+                with self.base.resourcesMutex:
+                    # Verifica se precisa mandar suprimentos para a Lua
+                    if self.moonSupplierIA.moonNeedSupplies:
+                        hasEnoughResources = self.attackerIA.hasResourcesToCreateLion()
+                    else:  # Ou atacar planetas
+                        hasEnoughResources = self.attackerIA.hasResourcesToAttack()
 
-                # Aguarda possuir recursos suficientes para atacar por meio de Condition
-                else:
-                    while not self.attackerIA.hasResourcesToAttack():
-                        # print(f'[{self.base.name}-Engineering] -> NO RESOURCES TO ATTACK!!, esperando...')
+                    # Se não tiver recursos necessários irá esperar
+                    if not hasEnoughResources:
                         self.base.resourcesToCreateRockets.wait()
-                        continue
 
             # print(f'[{self.base.name} - Engineering] -> CRIANDO FOGUETE!!')
-            # Cria foguete e adiciona ao estoque
-            self.base.resourcesMutex.acquire()
-            self.base.storage.append(self.__createRocket())
-            self.base.resourcesMutex.release()
+            # Acessa o estoque de recursos e cria o foguete
+            with self.base.resourcesMutex:
+                rocket = self.__createRocket()
+
+            # Acessa o estoque de foguetes e armazena o foguete
+            with self.base.storageMutex:
+                self.base.storage.append(rocket)
 
             # Libera semáforo de foguete no estoque
             self.base.semRocketInStorage.release()

@@ -6,6 +6,7 @@ class Planets(str, Enum):
     MARS = 'mars'
     GANIMEDES = 'ganimedes'
     EUROPA = 'europa'
+    MOON = 'MOON'
 
 
 class Rockets(str, Enum):

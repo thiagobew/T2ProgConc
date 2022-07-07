@@ -41,8 +41,10 @@ class MoonBaseEngineeringThread(Thread):
             # Já adquiriu recursos suficientes para construir Dragon
             self.moonSupplierIA.moonNeedSupplies = False
 
+            # Adquire o mutex para acessar o estoque de suprimentos
             # Cria foguete e adiciona ao estoque
-            self.base.storage.append(self.__createRocket())
+            with self.base.resourcesMutex:
+                self.base.storage.append(self.__createRocket())
 
             # Libera semáforo de foguete no estoque
             self.base.semRocketInStorage.release()
@@ -52,3 +54,17 @@ class MoonBaseEngineeringThread(Thread):
             return self.rocketsIA.createRocketLion()
 
         return self.rocketsIA.createRocketToAttack()
+
+    def storeSuppliesOfLionRocket(self) -> None:
+        # Verifica quanto cabe no estoque
+        spaceForFuel = self.base.fuelLimit - self.base.fuel
+        spaceForUranium = self.base.uraniumLimit - self.base.uranium
+
+        # Pega a quantidade que dá para armazenar
+        fuelToStore = min(spaceForFuel, 120)
+        uraniumToStore = min(spaceForUranium, 75)
+
+        # Armazena os recursos
+        with self.base.resourcesMutex:
+            self.base.fuel += fuelToStore
+            self.base.uranium += uraniumToStore

@@ -1,4 +1,5 @@
 from threading import Thread
+from time import sleep
 from typing import Tuple
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
 from Enum.Enum import Bases, Planets, Polo, Rockets
@@ -41,13 +42,15 @@ class BaseLauncherThread(Thread):
             self.base.semSpaceInStorage.release()
 
             # Efetua o lançamento do foguete
-            self.__launchRocket()
+            voyageThread = Thread(target=self.__launchRocket)
+            voyageThread.start()
 
     def __launchRocket(self):
         if self.__rocketInPlatform.name == Rockets.LION:
             print(f'[{self.base.name} - Launcher] -> Lançando Foguete para a Lua')
-            # self.__rocketInPlatform.voyage(Bases.MOON)
-            pass
+            moonBase = globals.get_bases_ref()['moon']
+
+            self.__rocketInPlatform.voyage((moonBase,))
         else:
             print(f'[{self.base.name} - Launcher] -> Atacando planetas')
             return

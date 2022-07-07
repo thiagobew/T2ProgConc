@@ -1,7 +1,9 @@
 from random import randrange, random
 from time import sleep
+from typing import Tuple
+from Synchronization.MoonResourcesSync import MoonSupplySync
 import globals
-from Enum.Enum import Polo
+from Enum.Enum import Polo, Rockets
 from Synchronization.PlanetsSync import PlanetsSync
 
 
@@ -35,18 +37,22 @@ class Rocket:
         planet.nuke_detected(self.damage(), terraformMutex)
         planetsMutexes.polesMutexDic[pole][planet].release()
 
-    def voyage(self, planetAndPole: tuple):  # Permitida a alteração (com ressalvas)
-        if self.name == "LION":
+    def voyage(self, planetAndPole: Tuple):  # Permitida a alteração (com ressalvas)
+        if self.name == Rockets.LION:
             # Nesse caso, o planeta é a base lunar
             moonBase = planetAndPole[0]
+            moonSupplyIA = MoonSupplySync()
 
             # 4 dias de viagem
             sleep(0.011)
             self.do_we_have_a_problem()
 
-            # Precisa de proteção?
-            moonBase.uranium += self.uranium
-            moonBase.fuel += self.fuel
+            # Armazena suprimentos no estoque
+            moonBase.receiveLionRocket()
+
+            # Notifica departamento de engenharia da Lua que tem novos recursos
+            with moonSupplyIA.moonSupplyMutex:
+                moonSupplyIA.resourcesArrived.notify()
         else:
             # Essa chamada de código (do_we_have_a_problem e simulation_time_voyage) não pode ser retirada.
             # Você pode inserir código antes ou depois dela e deve
