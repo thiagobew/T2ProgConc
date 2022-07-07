@@ -1,7 +1,7 @@
 from typing import List
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
 from Enum.Enum import Bases, Rockets
-from threading import Thread, Lock, Condition
+from threading import BoundedSemaphore, Thread, Lock, Condition, Semaphore
 from space.BaseThreads.BaseEngineering import BaseEngineeringThread
 from space.BaseThreads.BaseLauncher import BaseLauncherThread
 from space.BaseThreads.EarthBaseMining import EarthBaseMiningThread
@@ -24,7 +24,7 @@ class SpaceBase(Thread, AbstractSpaceBase):
         self.__constraints = [uranium, fuel, rockets]
 
     def run(self):
-        self.__maximumStorageRockets = self.__getRocketsStorageLimit()
+        self.__rocketsStorageLimit = self.__getRocketsStorageLimit()
 
         # Controle de concorrência para a mineração de recursos e criação de foguetes
         self.__resourcesMutex = Lock()
@@ -36,6 +36,8 @@ class SpaceBase(Thread, AbstractSpaceBase):
         self.__storageMutex = Lock()
         self.__spaceForAnotherRocket = Condition(self.__storageMutex)
         self.__rocketInStorage = Condition(self.__storageMutex)
+        self.semSpaceInStorage = BoundedSemaphore(self.__rocketsStorageLimit)
+        self.semRocketInStorage = Semaphore(0)
 
         # Cria as threads que irão trabalhar dentro da base
         if self.__name == Bases.MOON:
@@ -104,7 +106,7 @@ class SpaceBase(Thread, AbstractSpaceBase):
 
     @property
     def storageLimit(self) -> int:
-        return self.__maximumStorageRockets
+        return self.__rocketsStorageLimit
 
     @property
     def uranium(self) -> int:

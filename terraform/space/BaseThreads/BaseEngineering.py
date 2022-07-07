@@ -24,13 +24,12 @@ class BaseEngineeringThread(Thread):
             pass
 
         while True:
-            # Adquire o mutex para acessar o estoque de foguetes
-            with self.base.storageMutex:
-                if len(self.base.storage) == self.base.storageLimit:
-                    # print(f'[{self.base.name}-Engineering] -> NO SPACE FOR ROCKET!! Esperando...')
-                    self.base.spaceForAnotherRocket.wait()
+            # Aguarda um lugar vazio no estoque de foguetes
+            self.base.semSpaceInStorage.acquire()
 
             # Adquire mutex para acessar os recursos
+            # Ele é notificado sempre que novos recursos são adicionados, por isso o mecanismo while not e continue
+            # para quando ele acordar verificar se já existe recursos suficientes e prosseguir com a criação
             with self.base.resourcesMutex:
                 # Aguarda possuir recursos suficientes para criar Lion por meio de Condition
                 if self.moonSupplierIA.moonNeedSupplies and self.base.name != Bases.MOON:
@@ -47,10 +46,13 @@ class BaseEngineeringThread(Thread):
                         continue
 
             # print(f'[{self.base.name} - Engineering] -> CRIANDO FOGUETE!!')
-            # Cria foguete necessário, adiciona ao estoque e notifica departamento de lançamento
-            with self.base.storageMutex:
-                self.base.storage.append(self.__createRocket())
-                self.base.rocketInStorage.notify()
+            # Cria foguete e adiciona ao estoque
+            self.base.resourcesMutex.acquire()
+            self.base.storage.append(self.__createRocket())
+            self.base.resourcesMutex.release()
+
+            # Libera semáforo de foguete no estoque
+            self.base.semRocketInStorage.release()
 
     def __createRocket(self) -> Rocket:
         if self.base.name != Bases.MOON and self.moonSupplierIA.moonNeedSupplies:

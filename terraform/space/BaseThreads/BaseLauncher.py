@@ -24,18 +24,19 @@ class BaseLauncherThread(Thread):
         # O que limita lançamento de foguetes é a quantidade de recursos disponíveis
         # e se um foguete já ocupa a base, não podem 2 serem lançados ao mesmo tempo
         while True:
-            # Posiciona um foguete na plataforma de lançamento quando disponível
-            with self.base.storageMutex:
-                if len(self.base.storage) == 0:
-                    # print(f'[{self.base.name}-Launcher] -> No Rockets, esperando...')
-                    self.base.rocketInStorage.wait()
+            # Aguarda um foguete no estoque
+            self.base.semRocketInStorage.acquire()
 
-                self.__rocketInPlatform = self.base.storage.pop(0)
+            # Remove o foguete do estoque e coloca na plataforma
+            self.base.storageMutex.acquire()
+            self.__rocketInPlatform = self.base.storage.pop(0)
+            self.base.storageMutex.release()
+
+            # Libera semáforo de espaço vazio no estoque
+            self.base.semSpaceInStorage.release()
 
             # Efetua o lançamento do foguete
             self.__launchRocket()
-            with self.base.storageMutex:
-                self.base.spaceForAnotherRocket.notify()
 
     def __launchRocket(self):
         if self.__rocketInPlatform.name == Rockets.LION:
