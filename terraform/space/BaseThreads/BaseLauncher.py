@@ -1,7 +1,8 @@
 from threading import Thread
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
-from Enum.Enum import Bases, Planets, Rockets
+from Enum.Enum import Bases, Planets, Polo, Rockets
 from space.rocket import Rocket
+from Synchronization import LaunchSync, PlanetsSync
 
 import globals
 
@@ -12,11 +13,13 @@ class BaseLauncherThread(Thread):
     def __init__(self, baseInstance: AbstractSpaceBase, target=None, name=None, args=None,  kwargs=None, daemon=None) -> None:
         self.base: AbstractSpaceBase = baseInstance
         self.__rocketInPlatform: Rocket = None
+        self.__planets_ref = globals.get_planets_ref()
 
         super().__init__(None, target, name, args, kwargs, daemon=daemon)
 
     def run(self):
-        print(f'[BaseLauncher] -> Iniciando Departamento de Lançamento da base {self.base.name}')
+        print(
+            f'[BaseLauncher] -> Iniciando Departamento de Lançamento da base {self.base.name}')
 
         while (globals.get_release_system() == False):
             pass
@@ -44,10 +47,25 @@ class BaseLauncherThread(Thread):
             # self.__rocketInPlatform.voyage(Bases.MOON)
             pass
         else:
+            semFreePlanets = LaunchSync().semFreePlanets
+            semFreePlanets.acquire()
             print(f'[{self.base.name} - Launcher] -> Atacando planetas')
             destiny = self.__getRocketDestiny()
-            # self.__rocketInPlatform.voyage(destiny)
-            pass
+            if(self.__rocketInPlatform.successfully_launch(self.base)):
+                print(
+                    f"[{self.__rocketInPlatform.name} - {self.__rocketInPlatform.id}] launched.")
+                self.__rocketInPlatform.voyage(destiny)
 
-    def __getRocketDestiny(self) -> Planets:
-        return Planets.EUROPA
+    def __getRocketDestiny(self) -> tuple(Planets, Polo):
+        planetsMutexes = PlanetsSync()
+        for planet in self.__planets_ref:
+            northFree = planetsMutexes.polesMutexDic[Polo.NORTH][planet].acquire(
+                blocking=false)
+            southFree = planetsMutexes.polesMutexDic[Polo.SOUTH][planet].acquire(
+                blocking=false)
+
+            if northFree:
+                return (planet, Polo.NORTH)
+
+            if southFree:
+                return (planet, Polo.SOUTH)

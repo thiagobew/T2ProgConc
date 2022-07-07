@@ -1,5 +1,6 @@
 from threading import Thread, Lock
 from Abstractions.AbstractPlanet import AbstractPlanet
+from Synchronization import LaunchSync
 import globals
 
 
@@ -18,6 +19,8 @@ class Planet(Thread, AbstractPlanet):
         lock.release()
         print(
             f"[NUKE DETECTION] - The planet {self.name} was bombed by {damage}. {self.terraform}% UNHABITABLE")
+        semFreePlanets = LaunchSync().semFreePlanets
+        semFreePlanets.release()
 
     def printPlanetInfo(self):
         print(f"🪐 - [{self.name}] → {self.terraform}% UNINHABITABLE")

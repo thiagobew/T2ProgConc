@@ -24,3 +24,8 @@ class Bases(str, Enum):
 class Mines(str, Enum):
     FUEL = 'oil_earth'
     URANIUM = 'uranium_earth'
+
+
+class Polo(str, Enum):
+    NORTH = 'north'
+    SOUTH = 'south'

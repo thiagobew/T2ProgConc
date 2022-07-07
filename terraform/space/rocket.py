@@ -1,6 +1,8 @@
 from random import randrange, random
 from time import sleep
 import globals
+from Enum.Enum import Polo
+from Synchronization.PlanetsSync import PlanetsSync
 
 
 class Rocket:
@@ -15,23 +17,28 @@ class Rocket:
             self.fuel_cargo = 0
             self.uranium_cargo = 0
 
-    def nuke(self, planet):  # Permitida a alteração
+    def nuke(self, planetAndPole: tuple):  # Permitida a alteração
+        planet = planetAndPole[0]
+        pole = planetAndPole[1]
         terraformMutex = globals.get_planets_ref()[
             planet.name]["terraformMutex"]
+        planetsMutexes = PlanetsSync()
 
-        print(
-            f"[EXPLOSION] - The {self.name} ROCKET reached the planet {planet.name} on North Pole")
-        print(
-            f"[EXPLOSION] - The {self.name} ROCKET reached the planet {planet.name} on South Pole")
+        if pole == Polo.NORTH:
+            print(
+                f"[EXPLOSION] - The {self.name} ROCKET reached the planet {planet.name} on North Pole")
+        else:
+            print(
+                f"[EXPLOSION] - The {self.name} ROCKET reached the planet {planet.name} on South Pole")
 
-        while planet.terraform > 0:
-            terraformMutex.acquire()
-            planet.nuke_detected(self.damage(), terraformMutex)
+        terraformMutex.acquire()
+        planet.nuke_detected(self.damage(), terraformMutex)
+        planetsMutexes.polesMutexDic[pole][planet].release()
 
-    def voyage(self, planet):  # Permitida a alteração (com ressalvas)
+    def voyage(self, planetAndPole: tuple):  # Permitida a alteração (com ressalvas)
         if self.name == "LION":
             # Nesse caso, o planeta é a base lunar
-            moonBase = planet
+            moonBase = planetAndPole[0]
 
             # 4 dias de viagem
             sleep(0.011)
@@ -44,9 +51,9 @@ class Rocket:
             # Essa chamada de código (do_we_have_a_problem e simulation_time_voyage) não pode ser retirada.
             # Você pode inserir código antes ou depois dela e deve
             # usar essa função.
-            self.simulation_time_voyage(planet)
+            self.simulation_time_voyage(planetAndPole[0])
             failure = self.do_we_have_a_problem()
-            self.nuke(planet)
+            self.nuke(planetAndPole)
 
     ####################################################
     #                   ATENÇÃO                        #
