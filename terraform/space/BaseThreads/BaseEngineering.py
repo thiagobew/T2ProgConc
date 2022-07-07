@@ -8,7 +8,7 @@ from space.rocket import Rocket
 import globals
 
 
-class BaseEngineeringThread(Thread):
+class EarthBaseEngineeringThread(Thread):
     """Classe para a criação de foguetes para uma base"""
 
     def __init__(self, baseInstance: AbstractSpaceBase, target=None, name=None, args=None,  kwargs=None, daemon=None) -> None:

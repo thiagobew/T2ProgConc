@@ -1,4 +1,4 @@
-from multiprocessing import Semaphore
+from threading import Semaphore
 from Config.Singleton import Singleton
 import globals
 

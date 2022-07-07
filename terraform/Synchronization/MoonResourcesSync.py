@@ -1,4 +1,4 @@
-from threading import Lock
+from threading import Condition, Lock
 from Config.Singleton import Singleton
 
 
@@ -7,6 +7,7 @@ class MoonSupplySync(Singleton):
         if not super().created:
             self.__moonNeedSupplies = False
             self.__moonSupplyMutex = Lock()
+            self.__resourcesArrived = Condition(self.__moonSupplyMutex)
 
     @property
     def moonNeedSupplies(self) -> bool:
@@ -19,3 +20,7 @@ class MoonSupplySync(Singleton):
     @property
     def moonSupplyMutex(self) -> Lock:
         return self.__moonSupplyMutex
+
+    @property
+    def resourcesArrived(self) -> Condition:
+        return self.__resourcesArrived

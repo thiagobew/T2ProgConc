@@ -2,10 +2,10 @@ from typing import List
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
 from Enum.Enum import Bases, Rockets
 from threading import BoundedSemaphore, Thread, Lock, Condition, Semaphore
-from space.BaseThreads.BaseEngineering import BaseEngineeringThread
+from space.BaseThreads.BaseEngineering import EarthBaseEngineeringThread
 from space.BaseThreads.BaseLauncher import BaseLauncherThread
 from space.BaseThreads.EarthBaseMining import EarthBaseMiningThread
-from space.BaseThreads.MoonBaseMining import MoonBaseMiningThread
+from space.BaseThreads.MoonBaseEngineering import MoonBaseEngineeringThread
 
 import globals
 
@@ -40,26 +40,28 @@ class SpaceBase(Thread, AbstractSpaceBase):
         self.semRocketInStorage = Semaphore(0)
 
         # Cria as threads que irão trabalhar dentro da base
-        if self.__name == Bases.MOON:
-            self.baseMining = MoonBaseMiningThread(baseInstance=self)
-        else:
+        if self.__name != Bases.MOON:
+            self.baseEngineering = EarthBaseEngineeringThread(baseInstance=self)
             self.baseMining = EarthBaseMiningThread(baseInstance=self)
+        else:
+            self.baseEngineering = MoonBaseEngineeringThread(baseInstance=self)
         self.baseAttacker = BaseLauncherThread(baseInstance=self)
-        self.baseEngineering = BaseEngineeringThread(baseInstance=self)
 
         # Inicia elas
-        self.baseMining.start()
+        if self.__name != Bases.MOON:
+            self.baseMining.start()
+            self.baseEngineering.start()
         self.baseAttacker.start()
-        self.baseEngineering.start()
 
         globals.acquire_print()
         self.printSpaceBaseInfo()
         globals.release_print()
 
         # Espera pelas bases
-        self.baseMining.join()
+        if self.__name != Bases.MOON:
+            self.baseMining.join()
+            self.baseEngineering.join()
         self.baseAttacker.join()
-        self.baseEngineering.join()
 
     def __getRocketsStorageLimit(self) -> int:
         if self.__name == Bases.ALCANTARA:

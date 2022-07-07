@@ -1,8 +1,10 @@
 from threading import Thread
+from typing import Tuple
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
 from Enum.Enum import Bases, Planets, Polo, Rockets
 from space.rocket import Rocket
-from Synchronization import LaunchSync, PlanetsSync
+from Synchronization.LaunchSync import LaunchSync
+from Synchronization.PlanetsSync import PlanetsSync
 
 import globals
 
@@ -47,22 +49,21 @@ class BaseLauncherThread(Thread):
             # self.__rocketInPlatform.voyage(Bases.MOON)
             pass
         else:
+            print(f'[{self.base.name} - Launcher] -> Atacando planetas')
+            return
             semFreePlanets = LaunchSync().semFreePlanets
             semFreePlanets.acquire()
-            print(f'[{self.base.name} - Launcher] -> Atacando planetas')
             destiny = self.__getRocketDestiny()
             if(self.__rocketInPlatform.successfully_launch(self.base)):
                 print(
                     f"[{self.__rocketInPlatform.name} - {self.__rocketInPlatform.id}] launched.")
                 self.__rocketInPlatform.voyage(destiny)
 
-    def __getRocketDestiny(self) -> tuple(Planets, Polo):
+    def __getRocketDestiny(self) -> Tuple[Planets, Polo]:
         planetsMutexes = PlanetsSync()
         for planet in self.__planets_ref:
-            northFree = planetsMutexes.polesMutexDic[Polo.NORTH][planet].acquire(
-                blocking=false)
-            southFree = planetsMutexes.polesMutexDic[Polo.SOUTH][planet].acquire(
-                blocking=false)
+            northFree = planetsMutexes.polesMutexDic[Polo.NORTH][planet].acquire(blocking=False)
+            southFree = planetsMutexes.polesMutexDic[Polo.SOUTH][planet].acquire(blocking=False)
 
             if northFree:
                 return (planet, Polo.NORTH)

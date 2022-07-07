@@ -26,16 +26,16 @@ class RocketsProductionIA():
 
     def createRocketToAttack(self) -> Rocket:
         rocketsToChoice = []
-        if self.__hasResourcesToCreateDragon():
+        if self.hasResourcesToCreateDragon():
             rocketsToChoice.append(Rockets.DRAGON)
-        if self.__hasResourcesToCreateFalcon():
+        if self.hasResourcesToCreateFalcon():
             rocketsToChoice.append(Rockets.FALCON)
 
         rocketName = choice(rocketsToChoice)
         if rocketName == Rockets.DRAGON:
-            return self.__createDragonRocket()
+            return self.createDragonRocket()
         else:
-            return self.__createFalconRocket()
+            return self.createFalconRocket()
 
     def hasResourcesToCreateLion(self) -> bool:
         if (self.base.uranium < 35):
@@ -65,7 +65,7 @@ class RocketsProductionIA():
 
         return Rocket(Rockets.LION)
 
-    def __createFalconRocket(self) -> Rocket:
+    def createFalconRocket(self) -> Rocket:
         self.base.uranium -= 35
 
         if self.base.name == Bases.ALCANTARA:
@@ -77,7 +77,7 @@ class RocketsProductionIA():
 
         return Rocket(Rockets.FALCON)
 
-    def __createDragonRocket(self) -> Rocket:
+    def createDragonRocket(self) -> Rocket:
         self.base.uranium -= 35
 
         if self.base.name == Bases.ALCANTARA:
@@ -89,7 +89,7 @@ class RocketsProductionIA():
 
         return Rocket(Rockets.DRAGON)
 
-    def __hasResourcesToCreateDragon(self) -> bool:
+    def hasResourcesToCreateDragon(self) -> bool:
         if self.base.uranium < 35:
             return False
 
@@ -105,7 +105,7 @@ class RocketsProductionIA():
             return False
         return True
 
-    def __hasResourcesToCreateFalcon(self) -> bool:
+    def hasResourcesToCreateFalcon(self) -> bool:
         if self.base.uranium < 35:
             return False
 

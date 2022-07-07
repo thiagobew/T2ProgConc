@@ -1,7 +1,7 @@
 from threading import Lock
 from Config.Singleton import Singleton
 import globals
-from terraform.Enum.Enum import Polo
+from Enum.Enum import Polo
 
 
 class PlanetsSync(Singleton):

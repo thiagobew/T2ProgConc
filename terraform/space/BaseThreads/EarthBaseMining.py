@@ -13,7 +13,6 @@ class EarthBaseMiningThread(Thread):
 
     def __init__(self, baseInstance: AbstractSpaceBase, target=None, name=None, args=None,  kwargs=None, daemon=None) -> None:
         self.base: AbstractSpaceBase = baseInstance
-        self.rocketsIA = RocketsProductionIA(self.base)
         super().__init__(None, target, name, args, kwargs, daemon=daemon)
 
     def run(self):
