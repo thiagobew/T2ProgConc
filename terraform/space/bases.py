@@ -34,7 +34,6 @@ class SpaceBase(Thread, AbstractSpaceBase):
         # Controle de concorrência para a criação e lançamento de foguetes
         self.__storage: List[Rockets] = []
         self.__rocketsStorageMutex = Lock()
-        self.__spaceForAnotherRocket = Condition(self.__rocketsStorageMutex)
         self.__semSpaceInStorage = BoundedSemaphore(self.__rocketsStorageLimit)
         self.__semRocketInStorage = Semaphore(0)
 
@@ -72,7 +71,6 @@ class SpaceBase(Thread, AbstractSpaceBase):
 
     def receiveLionRocket(self) -> None:
         if self.__name == Bases.MOON:
-            print(f'-> Lion aterrissando na Lua')
             self.baseEngineering.storeSuppliesOfLionRocket()
 
     def printSpaceBaseInfo(self):

@@ -1,9 +1,7 @@
 from threading import Thread
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
-from Enum.Enum import Bases
 from Synchronization.MoonResourcesSync import MoonSupplySync
 from space.BaseThreads.RocketsProductionIA import RocketsProductionIA
-from space.rocket import Rocket
 
 import globals
 
@@ -18,7 +16,7 @@ class EarthBaseEngineeringThread(Thread):
         super().__init__(None, target, name, args, kwargs, daemon=daemon)
 
     def run(self):
-        print(f'[{self.base.name} - Engineering] -> Iniciando operações')
+        print(f'[{self.base.name} - ENGINEERING] -> Iniciando operações')
 
         while (globals.get_release_system() == False):
             pass
@@ -50,10 +48,8 @@ class EarthBaseEngineeringThread(Thread):
             # Acessa o estoque de recursos e cria o foguete
             with self.base.resourcesMutex:
                 if willSendLion:
-                    print(f'[{self.base.name} - Engineering] -> CRIANDO LION!!')
                     rocket = self.attackerIA.createRocketLion()
                 else:
-                    print(f'[{self.base.name} - Engineering] -> CRIANDO PARA ATAQUE!!')
                     rocket = self.attackerIA.createRocketToAttack()
 
             # Acessa o estoque de foguetes e armazena o foguete

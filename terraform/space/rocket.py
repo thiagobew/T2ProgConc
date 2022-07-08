@@ -28,11 +28,9 @@ class Rocket:
         planetsMutexes = PlanetsSync()
 
         if pole == Polo.NORTH:
-            print(
-                f"[EXPLOSION] - The {self.name} ROCKET reached the planet {planet.name} on North Pole")
+            print(f"💥 - [NUKE] - {self.name} ROCKET reached the planet {planet.name} on North Pole")
         else:
-            print(
-                f"[EXPLOSION] - The {self.name} ROCKET reached the planet {planet.name} on South Pole")
+            print(f"💥 - [NUKE] - {self.name} ROCKET reached the planet {planet.name} on South Pole")
 
         terraformMutex.acquire()
         planet.nuke_detected(self.damage(), terraformMutex)
@@ -86,15 +84,15 @@ class Rocket:
         return False
 
     def general_failure(self):
-        print(f"[GENERAL FAILURE] - {self.name} ROCKET id: {self.id}")
+        print(f"⚡ - [GENERAL FAILURE] - {self.name} ROCKET id: {self.id}")
 
     def meteor_collision(self):
-        print(f"[METEOR COLLISION] - {self.name} ROCKET id: {self.id}")
+        print(f"☄️- [METEOR COLLISION] - {self.name} ROCKET id: {self.id}")
 
     def successfully_launch(self, base):
         if random() <= 0.1:
             print(
-                f"[LAUNCH FAILED] - {self.name} ROCKET id:{self.id} on {base.name}")
+                f"❌ - [LAUNCH FAILED] - {self.name} ROCKET id:{self.id} on {base.name}")
             return False
         return True
 

@@ -21,8 +21,7 @@ class BaseLauncherThread(Thread):
         super().__init__(None, target, name, args, kwargs, daemon=daemon)
 
     def run(self):
-        print(
-            f'[BaseLauncher] -> Iniciando Departamento de Lançamento da base {self.base.name}')
+        print(f'[{self.base.name} LAUNCHER] -> Iniciando operações')
 
         while (globals.get_release_system() == False):
             pass
@@ -50,17 +49,15 @@ class BaseLauncherThread(Thread):
                 if self.__rocketInPlatform.name == Rockets.LION:
                     MoonSupplySync().supplierSem.release()
 
-            self.base.printSpaceBaseInfo()
-
     def __voyageRocket(self, rocket: Rocket):
         """Função que controla a viagem do foguete"""
         if rocket.name == Rockets.LION:
-            print(f'[{self.base.name} - Launcher] -> Lançando Foguete para a Lua')
+            print(f'🚀🌑 - [{self.base.name} - Launcher] -> Foguete lançado para a Lua')
             moonBase = globals.get_bases_ref()['moon']
 
             rocket.voyage((moonBase,))
         else:
-            print(f'[{self.base.name} - Launcher] -> Foguete lançado')
+            print(f'🚀🪐 - [{self.base.name} - Launcher] -> Foguete lançado contra planetas')
             return
             semFreePlanets = LaunchSync().semFreePlanets
             semFreePlanets.acquire()

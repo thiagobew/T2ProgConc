@@ -18,7 +18,7 @@ class MoonBaseEngineeringThread(Thread):
         super().__init__(None, target, name, args, kwargs, daemon=daemon)
 
     def run(self):
-        print(f'[{self.base.name} - Engineering] -> Iniciando operações')
+        print(f'[{self.base.name} - ENGINEERING] -> Iniciando operações')
 
         while (globals.get_release_system() == False):
             pass
@@ -60,6 +60,8 @@ class MoonBaseEngineeringThread(Thread):
         return self.rocketsIA.createRocketToAttack()
 
     def storeSuppliesOfLionRocket(self) -> None:
+        print(f'🌑⛽ - [MOON] -> Lion aterrissando na Lua!')
+
         # Verifica quanto cabe no estoque
         spaceForFuel = self.base.fuelLimit - self.base.fuel
         spaceForUranium = self.base.uraniumLimit - self.base.uranium
