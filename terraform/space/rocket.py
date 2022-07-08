@@ -22,7 +22,6 @@ class Rocket:
     def nuke(self, planetAndPole: tuple):  # Permitida a alteração
         planet = planetAndPole[0]
         # Foguete Dragon está chegando aqui e dando erro de Index pois a tupla não possui o segundo valor
-        return
         pole = planetAndPole[1]
         terraformMutex = globals.get_planets_ref()[
             planet.name]["terraformMutex"]

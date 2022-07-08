@@ -1,8 +1,8 @@
 from threading import Thread
-from time import sleep
 from typing import Tuple
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
-from Enum.Enum import Bases, Planets, Polo, Rockets
+from Enum.Enum import Planets, Polo, Rockets
+from Synchronization.MoonResourcesSync import MoonSupplySync
 from space.rocket import Rocket
 from Synchronization.LaunchSync import LaunchSync
 from Synchronization.PlanetsSync import PlanetsSync
@@ -42,28 +42,33 @@ class BaseLauncherThread(Thread):
             # Libera semáforo de espaço vazio no estoque
             self.base.semSpaceInStorage.release()
 
-            # Efetua o lançamento do foguete
-            voyageThread = Thread(target=self.__launchRocket)
-            voyageThread.start()
+            # Verifica se teve um lançamento com sucesso a ativa a Thread para cuidar do voyage
+            if self.__rocketInPlatform.successfully_launch(self.base):
+                voyageThread = Thread(target=self.__voyageRocket, args=(self.__rocketInPlatform,))
+                voyageThread.start()
+            else:  # Se rocket falhado foi Lion libera para outra base tentar enviar o Lion também
+                if self.__rocketInPlatform.name == Rockets.LION:
+                    MoonSupplySync().supplierSem.release()
 
             self.base.printSpaceBaseInfo()
 
-    def __launchRocket(self):
-        if self.__rocketInPlatform.name == Rockets.LION:
+    def __voyageRocket(self, rocket: Rocket):
+        """Função que controla a viagem do foguete"""
+        if rocket.name == Rockets.LION:
             print(f'[{self.base.name} - Launcher] -> Lançando Foguete para a Lua')
             moonBase = globals.get_bases_ref()['moon']
 
-            self.__rocketInPlatform.voyage((moonBase,))
+            rocket.voyage((moonBase,))
         else:
             print(f'[{self.base.name} - Launcher] -> Foguete lançado')
             return
             semFreePlanets = LaunchSync().semFreePlanets
             semFreePlanets.acquire()
             destiny = self.__getRocketDestiny()
-            if(self.__rocketInPlatform.successfully_launch(self.base)):
+            if(rocket.successfully_launch(self.base)):
                 print(
-                    f"[{self.__rocketInPlatform.name} - {self.__rocketInPlatform.id}] launched.")
-                self.__rocketInPlatform.voyage(destiny)
+                    f"[{rocket.name} - {rocket.id}] launched.")
+                rocket.voyage(destiny)
 
     def __getRocketDestiny(self) -> Tuple[Planets, Polo]:
         planetsMutexes = PlanetsSync()
