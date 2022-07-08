@@ -8,7 +8,7 @@ class LaunchSync(Singleton):
         if not super().created:
             planetsAmount = len(globals.get_planets_ref())
 
-            # semáforo para indicar se há algum polo livre para lançamento
+            # Semáforo para indicar se há algum polo livre para lançamento
             self.__semFreePlanets = Semaphore(planetsAmount * 2)
 
     @property

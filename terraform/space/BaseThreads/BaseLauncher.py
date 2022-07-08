@@ -16,7 +16,6 @@ class BaseLauncherThread(Thread):
     def __init__(self, baseInstance: AbstractSpaceBase, target=None, name=None, args=None,  kwargs=None, daemon=None) -> None:
         self.base: AbstractSpaceBase = baseInstance
         self.__rocketInPlatform: Rocket = None
-        self.__planets_ref = globals.get_planets_ref()
 
         super().__init__(None, target, name, args, kwargs, daemon=daemon)
 
@@ -58,20 +57,24 @@ class BaseLauncherThread(Thread):
             rocket.voyage((moonBase,))
         else:
             print(f'🚀🪐 - [{self.base.name} - Launcher] -> Foguete lançado contra planetas')
-            return
-            semFreePlanets = LaunchSync().semFreePlanets
-            semFreePlanets.acquire()
             destiny = self.__getRocketDestiny()
-            if(rocket.successfully_launch(self.base)):
-                print(
-                    f"[{rocket.name} - {rocket.id}] launched.")
-                rocket.voyage(destiny)
+            rocket.voyage(destiny)
 
     def __getRocketDestiny(self) -> Tuple[Planets, Polo]:
-        planetsMutexes = PlanetsSync()
-        for planet in self.__planets_ref:
-            northFree = planetsMutexes.polesMutexDic[Polo.NORTH][planet].acquire(blocking=False)
-            southFree = planetsMutexes.polesMutexDic[Polo.SOUTH][planet].acquire(blocking=False)
+        # Adquire um semáforo que possui a quantidade de alvos possíveis para atacar
+        LaunchSync().semFreePlanets.acquire()
+
+        planetsSync = PlanetsSync()
+        planetsDict = globals.get_planets_ref()
+        for planetName, planet in planetsDict.items():
+            # Boleano se conseguiu pegar o Lock de um planeta
+            northFree = False
+            southFree = False
+
+            northFree = planetsSync.polesMutexDic[Polo.NORTH][planetName].acquire(blocking=False)
+            if not northFree:  # Se não conseguiu o polo norte tenta o Sul
+                southFree = planetsSync.polesMutexDic[Polo.SOUTH][planetName].acquire(
+                    blocking=False)
 
             if northFree:
                 return (planet, Polo.NORTH)
