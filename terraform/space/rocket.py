@@ -1,10 +1,13 @@
 from random import randrange, random
 from time import sleep
 from typing import Tuple
+from Abstractions.AbstractPlanet import AbstractPlanet
 from Synchronization.MoonResourcesSync import MoonSupplySync
+from Synchronization.TerraformSync import TerraformSync
 import globals
 from Enum.Enum import Polo, Rockets
 from Synchronization.PlanetsSync import PlanetsSync
+from Synchronization.LaunchSync import LaunchSync
 
 
 class Rocket:
@@ -19,22 +22,21 @@ class Rocket:
             self.fuel_cargo = 0
             self.uranium_cargo = 0
 
-    def nuke(self, planetAndPole: tuple):  # Permitida a alteração
+    def nuke(self, planetAndPole: Tuple[AbstractPlanet, Polo]):  # Permitida a alteração
         planet = planetAndPole[0]
-        # Foguete Dragon está chegando aqui e dando erro de Index pois a tupla não possui o segundo valor
         pole = planetAndPole[1]
-        terraformMutex = globals.get_planets_ref()[
-            planet.name]["terraformMutex"]
-        planetsMutexes = PlanetsSync()
 
-        if pole == Polo.NORTH:
-            print(f"💥 - [NUKE] - {self.name} ROCKET reached the planet {planet.name} on North Pole")
-        else:
-            print(f"💥 - [NUKE] - {self.name} ROCKET reached the planet {planet.name} on South Pole")
+        # Pega o nome do planeta em minúsculo para conseguir acessar o dicionário criado em simulation
+        planetName = planet.name.lower()
+        # Adquire e depois solta o mutex para alterar o terraform do planeta
+        TerraformSync().terraformMutexDic[planetName].acquire()
+        planet.nukeDetected(self.damage(), pole)
+        TerraformSync().terraformMutexDic[planetName].release()
 
-        terraformMutex.acquire()
-        planet.nuke_detected(self.damage(), terraformMutex)
-        planetsMutexes.polesMutexDic[pole][planet].release()
+        # Libera um no semáforo de destinos disponíveis para atacar
+        LaunchSync().semFreePlanets.release()
+        # Libera o mutex do destino específico, o polo que foi atacado
+        PlanetsSync().polesMutexDic[pole][planetName].release()
 
     def voyage(self, planetAndPole: Tuple):  # Permitida a alteração (com ressalvas)
         if self.name == Rockets.LION:
@@ -87,7 +89,7 @@ class Rocket:
         print(f"⚡ - [GENERAL FAILURE] - {self.name} ROCKET id: {self.id}")
 
     def meteor_collision(self):
-        print(f"☄️- [METEOR COLLISION] - {self.name} ROCKET id: {self.id}")
+        print(f"☄️ - [METEOR COLLISION] - {self.name} ROCKET id: {self.id}")
 
     def successfully_launch(self, base):
         if random() <= 0.1:

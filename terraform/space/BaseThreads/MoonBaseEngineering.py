@@ -60,7 +60,7 @@ class MoonBaseEngineeringThread(Thread):
         return self.rocketsIA.createRocketToAttack()
 
     def storeSuppliesOfLionRocket(self) -> None:
-        print(f'🌑⛽ - [MOON] -> Lion aterrissando na Lua!')
+        print(f'🌑 ⛽ - [MOON] -> Lion aterrissando na Lua!')
 
         # Verifica quanto cabe no estoque
         spaceForFuel = self.base.fuelLimit - self.base.fuel
