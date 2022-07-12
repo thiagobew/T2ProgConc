@@ -1,6 +1,6 @@
 from threading import Thread
 from time import sleep
-from Syncronization.MinesSync import MinesSync
+from Synchronization.MinesSync import MinesSync
 import globals
 
 

@@ -45,10 +45,11 @@ class MoonBaseEngineeringThread(Thread):
             # Já adquiriu recursos suficientes para construir Dragon
             self.moonSupplierIA.moonNeedSupplies = False
 
-            # Adquire o mutex para acessar o estoque de suprimentos
-            # Cria foguete e adiciona ao estoque
+            # Adquire o mutex para acessar o estoque de suprimentos e o estoque de foguetes
             with self.base.resourcesMutex:
-                self.base.storage.append(self.__createRocket())
+                with self.base.rocketsStorageMutex:
+                    # Cria o foguete e adiciona ao estoque
+                    self.base.storage.append(self.__createRocket())
 
             # Libera semáforo de foguete no estoque
             self.base.semRocketInStorage.release()

@@ -1,7 +1,8 @@
 from threading import Thread
 from typing import Tuple
+from Abstractions.AbstractPlanet import AbstractPlanet
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
-from Enum.Enum import Planets, Polo, Rockets
+from Enum.Enum import Polo, Rockets
 from Synchronization.MoonResourcesSync import MoonSupplySync
 from space.rocket import Rocket
 from Synchronization.LaunchSync import LaunchSync
@@ -44,7 +45,7 @@ class BaseLauncherThread(Thread):
             if self.__rocketInPlatform.successfully_launch(self.base):
                 voyageThread = Thread(target=self.__voyageRocket, args=(self.__rocketInPlatform,))
                 voyageThread.start()
-            else:  # Se rocket falhado foi Lion libera para outra base tentar enviar o Lion também
+            else:  # Se o rocket que falhou foi Lion libera para outra base tentar enviar o Lion também
                 if self.__rocketInPlatform.name == Rockets.LION:
                     MoonSupplySync().supplierSem.release()
 
@@ -56,11 +57,12 @@ class BaseLauncherThread(Thread):
 
             rocket.voyage((moonBase,))
         else:
-            print(f'🚀 🪐 - [{self.base.name} - Launcher] -> Foguete lançado contra planetas')
             destiny = self.__getRocketDestiny()
+            print(
+                f'🚀 🪐 - [{self.base.name} - Launcher] -> Foguete lançado em direção ao polo {destiny[1].name} de {destiny[0].name}')
             rocket.voyage(destiny)
 
-    def __getRocketDestiny(self) -> Tuple[Planets, Polo]:
+    def __getRocketDestiny(self) -> Tuple[AbstractPlanet, Polo]:
         # Adquire um semáforo que possui a quantidade de alvos possíveis para atacar
         LaunchSync().semFreePlanets.acquire()
 

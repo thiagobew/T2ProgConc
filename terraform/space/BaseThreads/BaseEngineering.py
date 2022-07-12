@@ -27,7 +27,7 @@ class EarthBaseEngineeringThread(Thread):
 
             willSendLion = False
             if self.moonSupplierIA.moonNeedSupplies:
-                # Tenta adquirir o mutex para ser a base a enviar um Lion para a Lua
+                # Tenta adquirir o semáforo para ser a base a enviar um Lion para a Lua
                 # Somente um planeta irá enviar um foguete para a Lua por vez
                 willSendLion = self.moonSupplierIA.supplierSem.acquire(blocking=False)
 

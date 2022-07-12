@@ -1,7 +1,7 @@
 from threading import Thread
 from random import randint
 from time import sleep
-from Syncronization.MinesSync import MinesSync
+from Synchronization.MinesSync import MinesSync
 
 import globals
 

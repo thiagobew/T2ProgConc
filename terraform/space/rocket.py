@@ -23,7 +23,7 @@ class Rocket:
             self.uranium_cargo = 0
 
     # Permitida a alteração
-    def nuke(self, planetAndPole: Tuple[AbstractPlanet, Polo]):
+    def nuke(self, planetAndPole: Tuple[AbstractPlanet, Polo]) -> bool:
         planet = planetAndPole[0]
         pole = planetAndPole[1]
 
@@ -31,14 +31,10 @@ class Rocket:
         planetName = planet.name.lower()
         # Adquire e depois solta o mutex para alterar o terraform do planeta
         TerraformSync().terraformMutexDic[planetName].acquire()
-        done = planet.nukeDetected(self.damage(), pole)
+        terraformCompleted = planet.nukeDetected(self.damage(), pole)
         TerraformSync().terraformMutexDic[planetName].release()
 
-        if not done:
-            # Libera um no semáforo de destinos disponíveis para atacar
-            LaunchSync().semFreePlanets.release()
-            # Libera o mutex do destino específico, o polo que foi atacado
-            PlanetsSync().polesMutexDic[pole][planetName].release()
+        return terraformCompleted
 
     def voyage(self, planetAndPole: Tuple):  # Permitida a alteração (com ressalvas)
         if self.name == Rockets.LION:
@@ -49,8 +45,11 @@ class Rocket:
             # 4 dias de viagem
             sleep(0.011)
 
-            # talvez nunca há problemas na viagem para a Lua?
-            # self.do_we_have_a_problem()
+            # Caso haja problemas durante a viagem do foguete para a Lua, libera semáforo para
+            # outra base poder enviar o foguete Lion no lugar
+            if self.do_we_have_a_problem():
+                MoonSupplySync().supplierSem.release()
+                return
 
             # Armazena suprimentos no estoque
             moonBase.receiveLionRocket()
@@ -62,14 +61,18 @@ class Rocket:
             # Essa chamada de código (do_we_have_a_problem e simulation_time_voyage) não pode ser retirada.
             # Você pode inserir código antes ou depois dela e deve
             # usar essa função.
-            self.simulation_time_voyage(planetAndPole[0])
-            failure = self.do_we_have_a_problem()
-            if failure:
-                LaunchSync().semFreePlanets.release()
-                PlanetsSync().polesMutexDic[planetAndPole[1]
-                                            ][planetAndPole[0]].release()
-            else:
+            planetName = planetAndPole[0].name.lower()
+            pole = planetAndPole[1]
+
+            # Se não houve problemas durante a viagem executa o bombardeamento
+            if not self.do_we_have_a_problem():
+                self.simulation_time_voyage(planetAndPole[0])
                 self.nuke(planetAndPole)
+
+            # Libera um no semáforo de destinos disponíveis para atacar
+            LaunchSync().semFreePlanets.release()
+            # Libera o mutex do destino específico, o polo que foi atacado
+            PlanetsSync().polesMutexDic[pole][planetName].release()
 
     ####################################################
     #                   ATENÇÃO                        #

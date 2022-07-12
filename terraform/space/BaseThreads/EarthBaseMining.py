@@ -69,7 +69,6 @@ class EarthBaseMiningThread(Thread):
         # Verifica quanto de fuel é possível extrair e armazenar
         quantToExtract = min(fuelRequired, fuelMine.unities)
         fuelMine.unities -= quantToExtract
-        sleep(2)
 
         # Libera a mina de fuel
         MinesSync().fuelMineMutex.release()
@@ -92,7 +91,6 @@ class EarthBaseMiningThread(Thread):
         # Verifica quanto de fuel é possível extrair
         quantToExtract = min(requiredUranium, uraniumMine.unities)
         uraniumMine.unities -= quantToExtract
-        sleep(2)
 
         # globals.acquire_print()
         # print(f'[{self.base.name} - MINING] -> Liberando mina de Uranium')

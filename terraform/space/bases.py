@@ -43,13 +43,13 @@ class SpaceBase(Thread, AbstractSpaceBase):
             self.baseMining = EarthBaseMiningThread(baseInstance=self)
         else:
             self.baseEngineering = MoonBaseEngineeringThread(baseInstance=self)
-        self.baseAttacker = BaseLauncherThread(baseInstance=self)
+        self.baseLauncher = BaseLauncherThread(baseInstance=self)
 
         # Inicia elas
         if self.__name != Bases.MOON:
             self.baseMining.start()
         self.baseEngineering.start()
-        self.baseAttacker.start()
+        self.baseLauncher.start()
 
         globals.acquire_print()
         self.printSpaceBaseInfo()
@@ -59,7 +59,7 @@ class SpaceBase(Thread, AbstractSpaceBase):
         if self.__name != Bases.MOON:
             self.baseMining.join()
         self.baseEngineering.join()
-        self.baseAttacker.join()
+        self.baseLauncher.join()
 
     def __getRocketsStorageLimit(self) -> int:
         if self.__name == Bases.ALCANTARA:
