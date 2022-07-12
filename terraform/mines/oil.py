@@ -1,6 +1,6 @@
 from threading import Thread
 from time import sleep
-
+from Syncronization.MinesSync import MinesSync
 import globals
 
 
@@ -25,9 +25,11 @@ class Pipeline(Thread):
         pass
 
     def produce(self):
+        MinesSync().fuelMineMutex.acquire()
         if (self.unities < self.constraint):
             self.unities += 17
             self.print_pipeline()
+        MinesSync().fuelMineMutex.release()
         sleep(0.001)
 
     def run(self):

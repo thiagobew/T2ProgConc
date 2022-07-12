@@ -15,6 +15,11 @@ class Planet(Thread, AbstractPlanet):
         self.name = name
 
     def nukeDetected(self, damage: float, pole: Polo) -> None:
+
+        if self.terraform <= damage:
+            self.terraform = 0
+            return True
+
         self.terraform -= damage
 
         if pole == Polo.NORTH:
@@ -23,6 +28,8 @@ class Planet(Thread, AbstractPlanet):
         else:
             print(
                 f"💥 - [NUKE IN {self.name}] - South Pole was bombed by {damage:.5f}. {self.terraform}% UNINHABITABLE")
+
+        return False
 
     def printPlanetInfo(self):
         print(f"🪐 - [{self.name}] → {self.terraform}% UNINHABITABLE")

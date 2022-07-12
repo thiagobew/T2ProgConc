@@ -22,7 +22,8 @@ class Rocket:
             self.fuel_cargo = 0
             self.uranium_cargo = 0
 
-    def nuke(self, planetAndPole: Tuple[AbstractPlanet, Polo]):  # Permitida a alteração
+    # Permitida a alteração
+    def nuke(self, planetAndPole: Tuple[AbstractPlanet, Polo]):
         planet = planetAndPole[0]
         pole = planetAndPole[1]
 
@@ -30,13 +31,14 @@ class Rocket:
         planetName = planet.name.lower()
         # Adquire e depois solta o mutex para alterar o terraform do planeta
         TerraformSync().terraformMutexDic[planetName].acquire()
-        planet.nukeDetected(self.damage(), pole)
+        done = planet.nukeDetected(self.damage(), pole)
         TerraformSync().terraformMutexDic[planetName].release()
 
-        # Libera um no semáforo de destinos disponíveis para atacar
-        LaunchSync().semFreePlanets.release()
-        # Libera o mutex do destino específico, o polo que foi atacado
-        PlanetsSync().polesMutexDic[pole][planetName].release()
+        if not done:
+            # Libera um no semáforo de destinos disponíveis para atacar
+            LaunchSync().semFreePlanets.release()
+            # Libera o mutex do destino específico, o polo que foi atacado
+            PlanetsSync().polesMutexDic[pole][planetName].release()
 
     def voyage(self, planetAndPole: Tuple):  # Permitida a alteração (com ressalvas)
         if self.name == Rockets.LION:
@@ -46,7 +48,9 @@ class Rocket:
 
             # 4 dias de viagem
             sleep(0.011)
-            self.do_we_have_a_problem()
+
+            # talvez nunca há problemas na viagem para a Lua?
+            # self.do_we_have_a_problem()
 
             # Armazena suprimentos no estoque
             moonBase.receiveLionRocket()
@@ -60,7 +64,12 @@ class Rocket:
             # usar essa função.
             self.simulation_time_voyage(planetAndPole[0])
             failure = self.do_we_have_a_problem()
-            self.nuke(planetAndPole)
+            if failure:
+                LaunchSync().semFreePlanets.release()
+                PlanetsSync().polesMutexDic[planetAndPole[1]
+                                            ][planetAndPole[0]].release()
+            else:
+                self.nuke(planetAndPole)
 
     ####################################################
     #                   ATENÇÃO                        #

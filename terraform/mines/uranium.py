@@ -1,6 +1,7 @@
 from threading import Thread
 from random import randint
 from time import sleep
+from Syncronization.MinesSync import MinesSync
 
 import globals
 
@@ -24,9 +25,11 @@ class StoreHouse(Thread):
         pass
 
     def produce(self):
+        MinesSync().uraniumMineMutex.acquire()
         if (self.unities < self.constraint):
             self.unities += 15
             self.print_store_house()
+        MinesSync().uraniumMineMutex.release()
         sleep(0.001)
 
     def run(self):
