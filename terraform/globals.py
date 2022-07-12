@@ -1,9 +1,10 @@
-from threading import Lock
+from threading import Lock, Thread
 from typing import Dict
 from Abstractions.AbstractMine import AbstractMine
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
 from Abstractions.AbstractPlanet import AbstractPlanet
 from Enum.Enum import Bases, Mines, Planets
+from space.TerraformVerifier import TerraformVerifier
 
 #  A total alteração deste arquivo é permitida.
 #  Lembre-se de que algumas variáveis globais são setadas no arquivo simulation.py
@@ -14,12 +15,24 @@ from Enum.Enum import Bases, Mines, Planets
 #  global de estados da aplicação e está presente em sistemas robustos pelo mundo.
 
 release_system = False
+terraformReady = False
 mutex_print = Lock()
 planets = {}
+noTerraformedPlanets = {}
 bases = {}
 mines = {}
 simulation_time = None
 moon_need_resources = False
+
+
+def getTerraformReady() -> bool:
+    global terraformReady
+    return terraformReady
+
+
+def setTerraformReady(bool: bool) -> None:
+    global terraformReady
+    terraformReady = bool
 
 
 def acquire_print() -> None:
@@ -34,7 +47,14 @@ def release_print() -> None:
 
 def set_planets_ref(all_planets: Dict[Planets, AbstractPlanet]) -> None:
     global planets
-    planets = all_planets
+    global noTerraformedPlanets
+    planets = all_planets.copy()
+    noTerraformedPlanets = all_planets.copy()
+
+
+def getNoTerraformedPlanets() -> Dict[Planets, AbstractPlanet]:
+    global noTerraformedPlanets
+    return noTerraformedPlanets
 
 
 def get_planets_ref() -> Dict[Planets, AbstractPlanet]:
@@ -64,6 +84,9 @@ def get_mines_ref() -> Dict[Mines, AbstractMine]:
 
 def set_release_system() -> None:
     global release_system
+    # Thread que irá ficar desligar o sistema quando o terraform terminar
+    thread = Thread(target=TerraformVerifier, args=(setTerraformReady, True))
+    thread.start()
     release_system = True
 
 

@@ -21,7 +21,7 @@ class MoonBaseEngineeringThread(Thread):
         while (globals.get_release_system() == False):
             pass
 
-        while True:
+        while not globals.terraformReady:
             # Aguarda um lugar vazio no estoque de foguetes
             self.base.semSpaceInStorage.acquire()
             # print(

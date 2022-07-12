@@ -21,7 +21,7 @@ class EarthBaseMiningThread(Thread):
         while (globals.get_release_system() == False):
             pass
 
-        while True:
+        while not globals.terraformReady:
             spaceAvailableForUranium = False
             spaceAvailableForFuel = False
             fuelRequired = 0

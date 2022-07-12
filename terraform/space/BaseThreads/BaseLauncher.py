@@ -28,7 +28,7 @@ class BaseLauncherThread(Thread):
 
         # O que limita lançamento de foguetes é a quantidade de recursos disponíveis
         # e se um foguete já ocupa a base, não podem 2 serem lançados ao mesmo tempo
-        while True:
+        while not globals.terraformReady:
             # Aguarda um foguete no estoque
             self.base.semRocketInStorage.acquire()
 
