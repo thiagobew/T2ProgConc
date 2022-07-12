@@ -1,9 +1,7 @@
 from threading import Thread
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
-from Enum.Enum import Bases
 from Synchronization.MoonResourcesSync import MoonSupplySync
 from space.BaseThreads.RocketsProductionIA import RocketsProductionIA
-from space.rocket import Rocket
 
 import globals
 
@@ -32,7 +30,7 @@ class MoonBaseEngineeringThread(Thread):
             # Acessa o estoque e verifica se possui recursos suficientes, se não irá solicitar recursos e dormir
             hasEnoughResources = False
             while not hasEnoughResources:
-                hasEnoughResources = self.rocketsIA.hasResourcesToCreateDragon()
+                hasEnoughResources = self.rocketsIA.hasResourcesToAttack()
 
                 # Se não possuir recursos espera
                 if not hasEnoughResources:
@@ -49,16 +47,10 @@ class MoonBaseEngineeringThread(Thread):
             with self.base.resourcesMutex:
                 with self.base.rocketsStorageMutex:
                     # Cria o foguete e adiciona ao estoque
-                    self.base.storage.append(self.__createRocket())
+                    self.base.storage.append(self.rocketsIA.createRocketToAttack())
 
             # Libera semáforo de foguete no estoque
             self.base.semRocketInStorage.release()
-
-    def __createRocket(self) -> Rocket:
-        if self.base.name != Bases.MOON and self.moonSupplierIA.moonNeedSupplies:
-            return self.rocketsIA.createRocketLion()
-
-        return self.rocketsIA.createRocketToAttack()
 
     def storeSuppliesOfLionRocket(self) -> None:
         print(f'🌑 ⛽ - [MOON] -> Lion aterrissando na Lua!')
