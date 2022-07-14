@@ -1,3 +1,4 @@
+from copy import deepcopy
 from threading import Lock, Thread
 from typing import Dict
 from Abstractions.AbstractMine import AbstractMine
@@ -48,8 +49,8 @@ def release_print() -> None:
 def set_planets_ref(all_planets: Dict[Planets, AbstractPlanet]) -> None:
     global planets
     global noTerraformedPlanets
-    planets = all_planets.copy()
-    noTerraformedPlanets = all_planets.copy()
+    planets = deepcopy(all_planets)
+    noTerraformedPlanets = deepcopy(all_planets)
 
 
 def getNoTerraformedPlanets() -> Dict[Planets, AbstractPlanet]:

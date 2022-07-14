@@ -2,6 +2,7 @@ from threading import Thread
 from Abstractions.AbstractPlanet import AbstractPlanet
 from Enum.Enum import Polo
 import globals
+from Synchronization.TerraformSync import TerraformSync
 
 
 class Planet(Thread, AbstractPlanet):
@@ -14,10 +15,16 @@ class Planet(Thread, AbstractPlanet):
         self.terraform = terraform
         self.name = name
 
-    def nukeDetected(self, damage: float, pole: Polo) -> None:
+    def nukeDetected(self, damage: float, pole: Polo) -> bool:
+        if self.terraform == 0:
+            return True
 
         if self.terraform <= damage:
             self.terraform = 0
+            dicNoTerraformedPlanets = globals.getNoTerraformedPlanets()
+            nameToDelete = self.name.lower()
+            del dicNoTerraformedPlanets[nameToDelete]
+            TerraformSync().semTerraformReady.release()
             return True
 
         self.terraform -= damage
