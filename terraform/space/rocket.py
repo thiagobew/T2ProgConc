@@ -8,6 +8,7 @@ import globals
 from Enum.Enum import Polo, Rockets
 from Synchronization.PlanetsSync import PlanetsSync
 from Synchronization.LaunchSync import LaunchSync
+from space.TerraformVerifier import TerraformVerifier
 
 
 class Rocket:
@@ -64,15 +65,18 @@ class Rocket:
             planetName = planetAndPole[0].name.lower()
             pole = planetAndPole[1]
 
+            planetTerraformCompleted = False
             # Se não houve problemas durante a viagem executa o bombardeamento
             if not self.do_we_have_a_problem():
                 self.simulation_time_voyage(planetAndPole[0])
-                self.nuke(planetAndPole)
+                planetTerraformCompleted = self.nuke(planetAndPole)
 
-            # Libera um no semáforo de destinos disponíveis para atacar
-            LaunchSync().semFreePlanets.release()
-            # Libera o mutex do destino específico, o polo que foi atacado
-            PlanetsSync().polesMutexDic[pole][planetName].release()
+            # Se o planeta ainda não foi terraformado, libera o semáforo de planetas disponíveis
+            if not planetTerraformCompleted:
+                # Libera um no semáforo de destinos disponíveis para atacar
+                LaunchSync().semFreePlanets.release()
+                # Libera o mutex do destino específico, o polo que foi atacado
+                PlanetsSync().polesMutexDic[pole][planetName].release()
 
     ####################################################
     #                   ATENÇÃO                        #
@@ -111,7 +115,7 @@ class Rocket:
         return True
 
     def damage(self):
-        return random()
+        return random() * 10
 
     def launch(self, base, planet):
         if(self.successfully_launch(base)):

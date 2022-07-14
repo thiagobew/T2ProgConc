@@ -67,7 +67,7 @@ class BaseLauncherThread(Thread):
         LaunchSync().semFreePlanets.acquire()
 
         planetsSync = PlanetsSync()
-        planetsDict = globals.get_planets_ref()
+        planetsDict = globals.getNoTerraformedPlanets()
         for planetName, planet in planetsDict.items():
             # Boleano se conseguiu pegar o Lock de um planeta
             northFree = False

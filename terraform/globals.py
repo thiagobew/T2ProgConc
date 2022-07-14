@@ -49,8 +49,12 @@ def release_print() -> None:
 def set_planets_ref(all_planets: Dict[Planets, AbstractPlanet]) -> None:
     global planets
     global noTerraformedPlanets
-    planets = deepcopy(all_planets)
-    noTerraformedPlanets = deepcopy(all_planets)
+    planets = all_planets
+
+    for planetName, planet in all_planets.items():
+        noTerraformedPlanets[planetName] = planet
+
+    print(noTerraformedPlanets)
 
 
 def getNoTerraformedPlanets() -> Dict[Planets, AbstractPlanet]:

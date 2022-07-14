@@ -16,10 +16,14 @@ class Planet(Thread, AbstractPlanet):
         self.name = name
 
     def nukeDetected(self, damage: float, pole: Polo) -> bool:
+        # Impede que um foguete lance uma bomba se o planeta já foi terraformado
         if self.terraform == 0:
             return True
 
         if self.terraform <= damage:
+            print('=-=' * 30)
+            print(f'PLANET {self.name} WAS SUCCESSFULLY TERRAFORMED')
+            print('=-=' * 30)
             self.terraform = 0
             dicNoTerraformedPlanets = globals.getNoTerraformedPlanets()
             nameToDelete = self.name.lower()
