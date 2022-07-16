@@ -54,8 +54,6 @@ def set_planets_ref(all_planets: Dict[Planets, AbstractPlanet]) -> None:
     for planetName, planet in all_planets.items():
         noTerraformedPlanets[planetName] = planet
 
-    print(noTerraformedPlanets)
-
 
 def getNoTerraformedPlanets() -> Dict[Planets, AbstractPlanet]:
     global noTerraformedPlanets

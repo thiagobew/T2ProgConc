@@ -1,14 +1,10 @@
 from random import randrange, random
 from time import sleep
-from typing import Tuple
 from Abstractions.AbstractPlanet import AbstractPlanet
 from Synchronization.MoonResourcesSync import MoonSupplySync
 from Synchronization.TerraformSync import TerraformSync
-import globals
 from Enum.Enum import Polo, Rockets
 from Synchronization.PlanetsSync import PlanetsSync
-from Synchronization.LaunchSync import LaunchSync
-from space.TerraformVerifier import TerraformVerifier
 
 
 class Rocket:
@@ -24,23 +20,44 @@ class Rocket:
             self.uranium_cargo = 0
 
     # Permitida a alteração
-    def nuke(self, planetAndPole: Tuple[AbstractPlanet, Polo]) -> bool:
-        planet = planetAndPole[0]
-        pole = planetAndPole[1]
-
-        # Pega o nome do planeta em minúsculo para conseguir acessar o dicionário criado em simulation
+    def nuke(self, planet: AbstractPlanet) -> bool:
+        # Adquire o semáforo para ser um dos dois rockets atacando o planeta
         planetName = planet.name.lower()
+        TerraformSync().terraformSemaphoreDic[planetName].acquire()
+
+        # Pega um dos polos e dá o acquire no Lock dele para atacar
+        pole = self.__getPoleToAttack(planet)
+
         # Adquire e depois solta o mutex para alterar o terraform do planeta
         TerraformSync().terraformMutexDic[planetName].acquire()
-        terraformCompleted = planet.nukeDetected(self.damage(), pole)
+        planet.nukeDetected(self.damage(), pole)
         TerraformSync().terraformMutexDic[planetName].release()
 
-        return terraformCompleted
+        # Libera o mutex do polo específico que foi atacado
+        PlanetsSync().polesMutexDic[pole][planetName].release()
+        # Libera para outro foguete atacar o planeta
+        TerraformSync().terraformSemaphoreDic[planetName].release()
 
-    def voyage(self, planetAndPole: Tuple):  # Permitida a alteração (com ressalvas)
+    def __getPoleToAttack(self, planet: AbstractPlanet) -> Polo:
+        # Nesse ponto é uma certeza que um dos polos está disponível
+        planetName = planet.name.lower()
+
+        # Tenta adquirir o mutex do polo norte do planeta
+        acquired = PlanetsSync().polesMutexDic[Polo.NORTH][planetName].acquire(blocking=False)
+
+        if not acquired:
+            acquired = PlanetsSync().polesMutexDic[Polo.SOUTH][planetName].acquire(blocking=False)
+            if not acquired:
+                print('ERRO')
+            else:
+                return Polo.SOUTH
+        else:
+            return Polo.NORTH
+
+    def voyage(self, planet: AbstractPlanet):  # Permitida a alteração (com ressalvas)
         if self.name == Rockets.LION:
             # Nesse caso, o planeta é a base lunar
-            moonBase = planetAndPole[0]
+            moonBase = planet
             moonSupplyIA = MoonSupplySync()
 
             # 4 dias de viagem
@@ -62,21 +79,11 @@ class Rocket:
             # Essa chamada de código (do_we_have_a_problem e simulation_time_voyage) não pode ser retirada.
             # Você pode inserir código antes ou depois dela e deve
             # usar essa função.
-            planetName = planetAndPole[0].name.lower()
-            pole = planetAndPole[1]
 
-            planetTerraformCompleted = False
             # Se não houve problemas durante a viagem executa o bombardeamento
             if not self.do_we_have_a_problem():
-                self.simulation_time_voyage(planetAndPole[0])
-                planetTerraformCompleted = self.nuke(planetAndPole)
-
-            # Se o planeta ainda não foi terraformado, libera o semáforo de planetas disponíveis
-            if not planetTerraformCompleted:
-                # Libera um no semáforo de destinos disponíveis para atacar
-                LaunchSync().semFreePlanets.release()
-                # Libera o mutex do destino específico, o polo que foi atacado
-                PlanetsSync().polesMutexDic[pole][planetName].release()
+                self.simulation_time_voyage(planet)
+                self.nuke(planet)
 
     ####################################################
     #                   ATENÇÃO                        #

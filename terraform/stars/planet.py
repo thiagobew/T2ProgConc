@@ -25,12 +25,17 @@ class Planet(Thread, AbstractPlanet):
             print(f'PLANET {self.name} WAS SUCCESSFULLY TERRAFORMED')
             print('=-=' * 30)
             self.terraform = 0
+
+            # Remove o planeta destruído do dicionário de planetas não destruídos
             dicNoTerraformedPlanets = globals.getNoTerraformedPlanets()
             nameToDelete = self.name.lower()
             del dicNoTerraformedPlanets[nameToDelete]
+
+            # Libera um contador do Terraform Verifier
             TerraformSync().semTerraformReady.release()
             return True
 
+        # Essa alteração do valor já está protegido por um Lock adquirido antes da chamada desse método
         self.terraform -= damage
 
         if pole == Polo.NORTH:

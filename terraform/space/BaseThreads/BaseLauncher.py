@@ -1,12 +1,10 @@
+from random import choice
 from threading import Thread
-from typing import Tuple
 from Abstractions.AbstractPlanet import AbstractPlanet
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
-from Enum.Enum import Polo, Rockets
+from Enum.Enum import Rockets
 from Synchronization.MoonResourcesSync import MoonSupplySync
 from space.rocket import Rocket
-from Synchronization.LaunchSync import LaunchSync
-from Synchronization.PlanetsSync import PlanetsSync
 
 import globals
 
@@ -32,7 +30,6 @@ class BaseLauncherThread(Thread):
             # Aguarda um foguete no estoque
             self.base.semRocketInStorage.acquire()
 
-            # print(f'[{self.base.name} - Launcher] -> Removendo foguete do Estoque')
             # Remove o foguete do estoque e coloca na plataforma
             self.base.rocketsStorageMutex.acquire()
             self.__rocketInPlatform = self.base.storage.pop(0)
@@ -55,31 +52,15 @@ class BaseLauncherThread(Thread):
             print(f'🚀 🌑 - [{self.base.name} - Launcher] -> Foguete lançado para a Lua')
             moonBase = globals.get_bases_ref()['moon']
 
-            rocket.voyage((moonBase,))
+            rocket.voyage(moonBase)
         else:
             destiny = self.__getRocketDestiny()
             print(
-                f'🚀 🪐 - [{self.base.name} - Launcher] -> Foguete lançado em direção ao polo {destiny[1].name} de {destiny[0].name}')
+                f'🚀 🪐 - [{self.base.name} - Launcher] -> Foguete lançado em direção ao planeta {destiny.name}')
             rocket.voyage(destiny)
 
-    def __getRocketDestiny(self) -> Tuple[AbstractPlanet, Polo]:
-        # Adquire um semáforo que possui a quantidade de alvos possíveis para atacar
-        LaunchSync().semFreePlanets.acquire()
-
-        planetsSync = PlanetsSync()
+    def __getRocketDestiny(self) -> AbstractPlanet:
+        # Escolhe aleatoriamente um dos planetas ainda não terraformados
         planetsDict = globals.getNoTerraformedPlanets()
-        for planetName, planet in planetsDict.items():
-            # Boleano se conseguiu pegar o Lock de um planeta
-            northFree = False
-            southFree = False
-
-            northFree = planetsSync.polesMutexDic[Polo.NORTH][planetName].acquire(blocking=False)
-            if not northFree:  # Se não conseguiu o polo norte tenta o Sul
-                southFree = planetsSync.polesMutexDic[Polo.SOUTH][planetName].acquire(
-                    blocking=False)
-
-            if northFree:
-                return (planet, Polo.NORTH)
-
-            if southFree:
-                return (planet, Polo.SOUTH)
+        chosen = choice(list(planetsDict.keys()))
+        return planetsDict[chosen]

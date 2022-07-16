@@ -1,4 +1,5 @@
 from threading import Lock
+from typing import Dict
 from Config.Singleton import Singleton
 import globals
 from Enum.Enum import Polo
@@ -16,5 +17,5 @@ class PlanetsSync(Singleton):
                 self.__polesMutexDic[Polo.SOUTH][key] = Lock()
 
     @property
-    def polesMutexDic(self) -> Lock:
+    def polesMutexDic(self) -> Dict[Polo, Lock]:
         return self.__polesMutexDic
