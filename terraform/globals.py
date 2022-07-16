@@ -1,10 +1,10 @@
-from copy import deepcopy
-from threading import Lock, Thread
+from threading import Lock, Thread, Condition
 from typing import Dict
 from Abstractions.AbstractMine import AbstractMine
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
 from Abstractions.AbstractPlanet import AbstractPlanet
 from Enum.Enum import Bases, Mines, Planets
+from Synchronization.FinalizeSync import FinalizeSync
 from space.TerraformVerifier import TerraformVerifier
 
 #  A total alteração deste arquivo é permitida.
@@ -17,6 +17,8 @@ from space.TerraformVerifier import TerraformVerifier
 
 release_system = False
 terraformReady = False
+lock = Lock()
+terraformReadyCondition = Condition(lock)
 mutex_print = Lock()
 planets = {}
 noTerraformedPlanets = {}
@@ -33,7 +35,14 @@ def getTerraformReady() -> bool:
 
 def setTerraformReady(bool: bool) -> None:
     global terraformReady
+    global mines
+    global planets
+    global bases
     terraformReady = bool
+
+    # Notifica que o programa deve ser finalizado
+    with FinalizeSync().programFinishLock:
+        FinalizeSync().programFinishCondition.notify_all()
 
 
 def acquire_print() -> None:

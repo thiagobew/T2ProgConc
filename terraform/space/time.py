@@ -22,7 +22,7 @@ class SimulationTime(Thread):
     def run(self):
         while(globals.get_release_system() == False):
             pass
-        while not globals.terraformReady:
+        while not globals.getTerraformReady():
             print(f"⌛ - {self.current_time} year(s) have passed...")
             self.current_time += 1
             sleep(1)

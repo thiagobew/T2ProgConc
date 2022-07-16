@@ -1,4 +1,5 @@
 from threading import Thread
+from time import sleep
 from Abstractions.AbstractPlanet import AbstractPlanet
 from Enum.Enum import Polo
 import globals
@@ -51,9 +52,6 @@ class Planet(Thread, AbstractPlanet):
         print(f"🪐 - [{self.name}] → {self.terraform}% UNINHABITABLE")
 
     def run(self):
-        # Criando mutex para proteger int terraform
-        planets = globals.get_planets_ref()
-        # planets[self.name]["terraformMutex"] = Lock()
 
         globals.acquire_print()
         self.printPlanetInfo()
@@ -61,3 +59,8 @@ class Planet(Thread, AbstractPlanet):
 
         while (globals.get_release_system() == False):
             pass
+
+        while not globals.getTerraformReady():
+            # Somente fica dando print do terraform
+            sleep(1)
+            self.printPlanetInfo()

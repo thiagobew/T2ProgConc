@@ -2,6 +2,7 @@ from typing import List
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
 from Enum.Enum import Bases, Rockets
 from threading import BoundedSemaphore, Thread, Lock, Condition, Semaphore
+from Synchronization.FinalizeSync import FinalizeSync
 from space.BaseThreads.BaseEngineering import EarthBaseEngineeringThread
 from space.BaseThreads.BaseLauncher import BaseLauncherThread
 from space.BaseThreads.EarthBaseMining import EarthBaseMiningThread
@@ -38,11 +39,11 @@ class SpaceBase(Thread, AbstractSpaceBase):
 
         # Cria as threads que irão trabalhar dentro da base
         if self.__name != Bases.MOON:
-            self.baseEngineering = EarthBaseEngineeringThread(baseInstance=self)
-            self.baseMining = EarthBaseMiningThread(baseInstance=self)
+            self.baseEngineering = EarthBaseEngineeringThread(baseInstance=self, daemon=True)
+            self.baseMining = EarthBaseMiningThread(baseInstance=self, daemon=True)
         else:
-            self.baseEngineering = MoonBaseEngineeringThread(baseInstance=self)
-        self.baseLauncher = BaseLauncherThread(baseInstance=self)
+            self.baseEngineering = MoonBaseEngineeringThread(baseInstance=self, daemon=True)
+        self.baseLauncher = BaseLauncherThread(baseInstance=self, daemon=True)
 
         # Inicia elas
         if self.__name != Bases.MOON:
@@ -54,11 +55,10 @@ class SpaceBase(Thread, AbstractSpaceBase):
         self.printSpaceBaseInfo()
         globals.release_print()
 
-        # Espera pelas bases
-        if self.__name != Bases.MOON:
-            self.baseMining.join()
-        self.baseEngineering.join()
-        self.baseLauncher.join()
+        # Espera a condição para o programa terminar
+        with FinalizeSync().programFinishLock:
+            FinalizeSync().programFinishCondition.wait()
+        # Como as threads criadas pela Base são daemons irão ser finalizadas automaticamente
 
     def __getRocketsStorageLimit(self) -> int:
         if self.__name == Bases.ALCANTARA:

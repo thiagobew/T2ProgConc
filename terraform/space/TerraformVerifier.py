@@ -1,5 +1,3 @@
-import sys
-import threading
 from typing import Callable
 from Synchronization.TerraformSync import TerraformSync
 
@@ -18,5 +16,3 @@ def TerraformVerifier(callback: Callable, args):
     callback(args)
 
     print('All planets are now terraformed, the Project Endurance was successfully completed!')
-    print(threading.active_count())
-    sys.exit()

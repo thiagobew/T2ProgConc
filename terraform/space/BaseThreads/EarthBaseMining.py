@@ -21,7 +21,7 @@ class EarthBaseMiningThread(Thread):
         while (globals.get_release_system() == False):
             pass
 
-        while not globals.terraformReady:
+        while not globals.getTerraformReady():
             spaceAvailableForUranium = False
             spaceAvailableForFuel = False
             fuelRequired = 0
@@ -53,18 +53,10 @@ class EarthBaseMiningThread(Thread):
                 collectedUranium = self.__collectUranium(uraniumRequired)
                 self.__storeUranium(collectedUranium)
 
-            # globals.acquire_print()
-            # self.base.printSpaceBaseInfo()
-            # globals.release_print()
-
     def __collectFuel(self, fuelRequired: int) -> int:
         # Entra na região crítica e pega a mina de fuel
         MinesSync().fuelMineMutex.acquire()
         fuelMine = globals.get_mines_ref()[Mines.FUEL]
-
-        # globals.acquire_print()
-        # print(f'[{self.base.name} - MINING] -> Consumindo mina de Fuel')
-        # globals.release_print()
 
         # Verifica quanto de fuel é possível extrair e armazenar
         quantToExtract = min(fuelRequired, fuelMine.unities)
@@ -73,10 +65,6 @@ class EarthBaseMiningThread(Thread):
         # Libera a mina de fuel
         MinesSync().fuelMineMutex.release()
 
-        # globals.acquire_print()
-        # print(f'[{self.base.name} - MINING] -> Liberando mina de Fuel')
-        # globals.release_print()
-
         return quantToExtract
 
     def __collectUranium(self, requiredUranium: int) -> int:
@@ -84,17 +72,9 @@ class EarthBaseMiningThread(Thread):
         MinesSync().uraniumMineMutex.acquire()
         uraniumMine = globals.get_mines_ref()[Mines.URANIUM]
 
-        # globals.acquire_print()
-        # print(f'[{self.base.name} - MINING] -> Consumindo mina de Uranium')
-        # globals.release_print()
-
         # Verifica quanto de fuel é possível extrair
         quantToExtract = min(requiredUranium, uraniumMine.unities)
         uraniumMine.unities -= quantToExtract
-
-        # globals.acquire_print()
-        # print(f'[{self.base.name} - MINING] -> Liberando mina de Uranium')
-        # globals.release_print()
 
         # Libera a mina de fuel
         MinesSync().uraniumMineMutex.release()

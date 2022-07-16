@@ -47,9 +47,7 @@ class Rocket:
 
         if not acquired:
             acquired = PlanetsSync().polesMutexDic[Polo.SOUTH][planetName].acquire(blocking=False)
-            if not acquired:
-                print('ERRO')
-            else:
+            if acquired:
                 return Polo.SOUTH
         else:
             return Polo.NORTH
@@ -122,7 +120,7 @@ class Rocket:
         return True
 
     def damage(self):
-        return random() * 10
+        return random()
 
     def launch(self, base, planet):
         if(self.successfully_launch(base)):

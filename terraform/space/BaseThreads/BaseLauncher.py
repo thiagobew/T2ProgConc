@@ -26,7 +26,7 @@ class BaseLauncherThread(Thread):
 
         # O que limita lançamento de foguetes é a quantidade de recursos disponíveis
         # e se um foguete já ocupa a base, não podem 2 serem lançados ao mesmo tempo
-        while not globals.terraformReady:
+        while not globals.getTerraformReady():
             # Aguarda um foguete no estoque
             self.base.semRocketInStorage.acquire()
 
@@ -55,12 +55,18 @@ class BaseLauncherThread(Thread):
             rocket.voyage(moonBase)
         else:
             destiny = self.__getRocketDestiny()
-            print(
-                f'🚀 🪐 - [{self.base.name} - Launcher] -> Foguete lançado em direção ao planeta {destiny.name}')
-            rocket.voyage(destiny)
+            if destiny is not None:
+                print(
+                    f'🚀 🪐 - [{self.base.name} - Launcher] -> Foguete lançado em direção ao planeta {destiny.name}')
+                rocket.voyage(destiny)
 
     def __getRocketDestiny(self) -> AbstractPlanet:
         # Escolhe aleatoriamente um dos planetas ainda não terraformados
         planetsDict = globals.getNoTerraformedPlanets()
+
+        # Caso todos os planetas foram terraformados e não tem mais destinos
+        if len(planetsDict) == 0:
+            return None
+
         chosen = choice(list(planetsDict.keys()))
         return planetsDict[chosen]

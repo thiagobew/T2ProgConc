@@ -21,7 +21,7 @@ class EarthBaseEngineeringThread(Thread):
         while (globals.get_release_system() == False):
             pass
 
-        while not globals.terraformReady:
+        while not globals.getTerraformReady():
             # Aguarda um lugar vazio no estoque de foguetes
             self.base.semSpaceInStorage.acquire()
 

@@ -21,8 +21,7 @@ class StoreHouse(Thread):
         self.constraint = constraint
 
     def print_store_house(self):
-        # print(f"🔨 - [{self.location}] - {self.unities} uranium unities are produced.")
-        pass
+        print(f"🔨 - [{self.location}] - {self.unities} uranium unities are produced.")
 
     def produce(self):
         MinesSync().uraniumMineMutex.acquire()
@@ -40,5 +39,5 @@ class StoreHouse(Thread):
         while (globals.get_release_system() == False):
             pass
 
-        while True:
+        while not globals.getTerraformReady():
             self.produce()

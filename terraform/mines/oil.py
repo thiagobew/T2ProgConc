@@ -19,10 +19,9 @@ class Pipeline(Thread):
         self.constraint = constraint
 
     def print_pipeline(self):
-        # print(
-        #     f"🔨 - [{self.location}] - {self.unities} oil unities are produced."
-        # )
-        pass
+        print(
+            f"🔨 - [{self.location}] - {self.unities} oil unities are produced."
+        )
 
     def produce(self):
         MinesSync().fuelMineMutex.acquire()
@@ -40,5 +39,5 @@ class Pipeline(Thread):
         while (globals.get_release_system() == False):
             pass
 
-        while True:
+        while not globals.getTerraformReady():
             self.produce()

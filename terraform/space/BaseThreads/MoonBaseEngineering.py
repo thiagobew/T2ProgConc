@@ -21,11 +21,9 @@ class MoonBaseEngineeringThread(Thread):
         while (globals.get_release_system() == False):
             pass
 
-        while not globals.terraformReady:
+        while not globals.getTerraformReady():
             # Aguarda um lugar vazio no estoque de foguetes
             self.base.semSpaceInStorage.acquire()
-            # print(
-            # f'[MOON] - Tem lugar no estoque de foguetes - {self.base.storageLimit} - {len(self.base.storage)}')
 
             # Acessa o estoque e verifica se possui recursos suficientes, se não irá solicitar recursos e dormir
             hasEnoughResources = False
