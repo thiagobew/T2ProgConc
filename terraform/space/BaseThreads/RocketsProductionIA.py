@@ -9,6 +9,7 @@ class RocketsProductionIA():
         self.base: AbstractSpaceBase = base
 
     def hasResourcesToAttack(self) -> bool:
+        # Recursos para criar ogivas
         if (self.base.uranium < 35):
             return False
 
@@ -38,26 +39,27 @@ class RocketsProductionIA():
             return self.createFalconRocket()
 
     def hasResourcesToCreateLion(self) -> bool:
-        if (self.base.uranium < 35):
+        # 75 para abastecer o Lion
+        if (self.base.uranium < 75):
             return False
 
         minRequiredFuel = 0
         if self.base.name == Bases.ALCANTARA:
-            minRequiredFuel = 100
+            minRequiredFuel = 220
         else:
-            minRequiredFuel = 115
+            minRequiredFuel = 235
 
         if (self.base.fuel < minRequiredFuel):
             return False
         return True
 
     def createRocketLion(self) -> Rocket:
-        self.base.uranium -= 35
+        self.base.uranium -= 75
 
         if self.base.name == Bases.ALCANTARA:
-            self.base.fuel -= 100
+            self.base.fuel -= 220
         else:
-            self.base.fuel -= 115
+            self.base.fuel -= 235
 
         if self.base.fuel < 0 or self.base.uranium < 0:
             print(f'❌ - [{self.base.name}] - Tentativa de criar Lion sem recursos necessários')
