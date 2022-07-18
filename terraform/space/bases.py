@@ -37,7 +37,7 @@ class SpaceBase(Thread, AbstractSpaceBase):
         self.__semSpaceInStorage = BoundedSemaphore(self.__rocketsStorageLimit)
         self.__semRocketInStorage = Semaphore(0)
 
-        # Cria as threads que irão trabalhar dentro da base
+        # Cria as threads que irão trabalhar dentro da base, a base da Lua não possui departamento de Mineração
         if self.__name != Bases.MOON:
             self.baseEngineering = EarthBaseEngineeringThread(baseInstance=self, daemon=True)
             self.baseMining = EarthBaseMiningThread(baseInstance=self, daemon=True)
@@ -69,6 +69,7 @@ class SpaceBase(Thread, AbstractSpaceBase):
             return 5
 
     def receiveLionRocket(self) -> None:
+        # Método para ser usado pela base da Lua para guardar os recursos que chegaram do Lion
         if self.__name == Bases.MOON:
             self.baseEngineering.storeSuppliesOfLionRocket()
 

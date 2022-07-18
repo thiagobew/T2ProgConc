@@ -49,13 +49,15 @@ class BaseLauncherThread(Thread):
     def __voyageRocket(self, rocket: Rocket):
         """Função que controla a viagem do foguete"""
         if rocket.name == Rockets.LION:
+            # Lança Lion para a Lua
             print(f'🚀 🌑 - [{self.base.name} - Launcher] -> Foguete lançado para a Lua')
             moonBase = globals.get_bases_ref()['moon']
 
             rocket.voyage(moonBase)
         else:
+            # Pega um destino aleatório entre os planetas para atacar e envia o foguete
             destiny = self.__getRocketDestiny()
-            if destiny is not None:
+            if destiny is not None:  # Pode retornar None quando todos os planetas são terraformados
                 print(
                     f'🚀 🪐 - [{self.base.name} - Launcher] -> Foguete lançado em direção ao planeta {destiny.name}')
                 rocket.voyage(destiny)

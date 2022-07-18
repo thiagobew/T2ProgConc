@@ -26,3 +26,5 @@ class SimulationTime(Thread):
             print(f"⌛ - {self.current_time} year(s) have passed...")
             self.current_time += 1
             sleep(1)
+
+        print(f'The Project Endurance has taken {self.current_time} years to complete!')

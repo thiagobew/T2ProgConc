@@ -20,7 +20,7 @@ class Rocket:
             self.uranium_cargo = 0
 
     # Permitida a alteração
-    def nuke(self, planet: AbstractPlanet) -> bool:
+    def nuke(self, planet: AbstractPlanet) -> None:
         # Adquire o semáforo para ser um dos dois rockets atacando o planeta
         planetName = planet.name.lower()
         TerraformSync().terraformSemaphoreDic[planetName].acquire()
@@ -35,7 +35,7 @@ class Rocket:
 
         # Libera o mutex do polo específico que foi atacado
         PlanetsSync().polesMutexDic[pole][planetName].release()
-        # Libera para outro foguete atacar o planeta
+        # Libera para outro foguete ser um dos dois foguetes atacando o planeta
         TerraformSync().terraformSemaphoreDic[planetName].release()
 
     def __getPoleToAttack(self, planet: AbstractPlanet) -> Polo:
@@ -58,11 +58,11 @@ class Rocket:
             moonBase = planet
             moonSupplyIA = MoonSupplySync()
 
-            # 4 dias de viagem
+            # 4 dias de viagem da Terra até a Lua (simulation_time_voyage)
             sleep(0.011)
 
             # Caso haja problemas durante a viagem do foguete para a Lua, libera semáforo para
-            # outra base poder enviar o foguete Lion no lugar
+            # outra base poder enviar o outro foguete Lion no lugar desse que explodiu
             if self.do_we_have_a_problem():
                 MoonSupplySync().supplierSem.release()
                 return
@@ -122,6 +122,10 @@ class Rocket:
     def damage(self):
         return random()
 
+    # Esse método não é mais chamado, mas a lógica requerida para o lançamento de foguetes se mantém a mesma
+    # A necessidade de não chamar ele pq precisamos saber se um foguete conseguiu ser lançado com sucesso,
+    # ou seja, o retorno de successfully_launch. Agora, chamamos diretamente successfully_launch no arquivo BaseLauncher
+    # Caso tenha sido sucesso chama a função voyage
     def launch(self, base, planet):
         if(self.successfully_launch(base)):
             print(f"[{self.name} - {self.id}] launched.")

@@ -6,6 +6,7 @@ from Abstractions.AbstractPlanet import AbstractPlanet
 from Enum.Enum import Bases, Mines, Planets
 from Synchronization.FinalizeSync import FinalizeSync
 from space.TerraformVerifier import TerraformVerifier
+from space.time import SimulationTime
 
 #  A total alteração deste arquivo é permitida.
 #  Lembre-se de que algumas variáveis globais são setadas no arquivo simulation.py

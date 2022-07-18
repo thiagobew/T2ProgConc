@@ -1,11 +1,9 @@
 from threading import Thread
-from time import sleep
 from Abstractions.AbstractSpaceBase import AbstractSpaceBase
 from Enum.Enum import Mines
 from Synchronization.MinesSync import MinesSync
 
 import globals
-from space.BaseThreads.RocketsProductionIA import RocketsProductionIA
 
 
 class EarthBaseMiningThread(Thread):

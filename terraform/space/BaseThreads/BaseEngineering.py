@@ -28,20 +28,20 @@ class EarthBaseEngineeringThread(Thread):
             willSendLion = False
             if self.moonSupplierIA.moonNeedSupplies:
                 # Tenta adquirir o semáforo para ser a base a enviar um Lion para a Lua
-                # Somente um planeta irá enviar um foguete para a Lua por vez
+                # Somente um planeta irá enviar um foguete para a Lua quando ela pede
                 willSendLion = self.moonSupplierIA.supplierSem.acquire(blocking=False)
 
             # Espera pela quantidade necessária de recursos para criar foguete
             hasEnoughResources = False
             with self.base.resourcesMutex:
                 while not hasEnoughResources:
-                    # Verifica se precisa mandar suprimentos para a Lua
+                    # Verifica se tem recursos para mandar suprimentos para a Lua
                     if willSendLion:
                         hasEnoughResources = self.attackerIA.hasResourcesToCreateLion()
-                    else:  # Ou atacar planetas
+                    else:  # Ou para atacar planetas
                         hasEnoughResources = self.attackerIA.hasResourcesToAttack()
 
-                    # Se não tiver recursos necessários irá esperar chegar novos recursos
+                    # Se não tiver recursos necessários irá esperar chegar novos recursos da base de coleta
                     if not hasEnoughResources:
                         self.base.resourcesToCreateRockets.wait()
 
@@ -56,5 +56,5 @@ class EarthBaseEngineeringThread(Thread):
             with self.base.rocketsStorageMutex:
                 self.base.storage.append(rocket)
 
-            # Libera semáforo de foguete no estoque
+            # Libera o semáforo de foguete no estoque, para o launcher poder lançar o foguete
             self.base.semRocketInStorage.release()

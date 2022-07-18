@@ -38,7 +38,7 @@ class MoonBaseEngineeringThread(Thread):
                         self.moonSupplierIA.supplierSem.release()
                         self.moonSupplierIA.resourcesArrived.wait()
 
-            # Já adquiriu recursos suficientes para construir Dragon
+            # Já adquiriu recursos suficientes para construir foguetes
             self.moonSupplierIA.moonNeedSupplies = False
 
             # Adquire o mutex para acessar o estoque de suprimentos e o estoque de foguetes
